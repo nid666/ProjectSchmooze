@@ -1,8 +1,30 @@
 import datetime
 import streamlit as st
 
-# Title
-st.title('Reservation System')
+# Ignore this, it is just page setup boilerplate
+st.set_page_config(
+    page_title="Project Schmooze",
+    page_icon="🧊",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': None
+    }
+)
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            .stDeployButton {display:none;}
+            footer {visibility: hidden;}
+            #stDecoration {display:none;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+# Title so that it can be centered
+st.markdown("<h1 style='text-align: center;'>Project Schmooze</h1>", unsafe_allow_html=True)
 
 # Select a date using streamlit date input
 selected_date = st.date_input("Input Reservation Date", datetime.date.today())
