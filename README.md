@@ -9,6 +9,7 @@ Platform for coordinating entertainment reservations between users and clients
 - Send out emails with voting links
 - Show final result
 
+## Phase 2 ToDo
 - Distance radius (tentative)
   - Custom API for open table
   - Radius
