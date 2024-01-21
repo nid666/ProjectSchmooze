@@ -2,12 +2,12 @@
 Platform for coordinating entertainment reservations between users and clients
 
 ## Phase 1 ToDo:
-- Allow to select/input/choose restaurants
-- Budget constraints per person
-- Select Entertainment Options
-- Voting System
-- Send out emails with voting links
-- Show final result
+- Allow to select/input/choose restaurants (sid)
+- Budget constraints per person (sid)
+- Select Entertainment Options (sid)
+- Voting System in email link (Noah)
+- Send out emails with voting links (Dean)
+- Show final result (Noah)
 
 ## Phase 2 ToDo
 - Distance radius (tentative)
