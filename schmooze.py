@@ -1,5 +1,7 @@
 import datetime
 import streamlit as st
+import re
+
 
 # Ignore this, it is just page setup boilerplate
 st.set_page_config(
@@ -22,6 +24,20 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+#checks if the email given to it is valid or not, returns a boolean
+def is_valid_email(email):
+
+    # Define the regular expression for a valid email
+    regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
+    
+    # Use the fullmatch method from the re module to check if the email matches the pattern
+    if re.fullmatch(regex, email):
+        return True
+    else:
+        return False
+
+
 
 # Title so that it can be centered
 st.markdown("<h1 style='text-align: center;'>Project Schmooze</h1>", unsafe_allow_html=True)
@@ -47,14 +63,16 @@ if len(selected_time_slots) > 3:
 
 st.divider()
 # Allowing to choose the places you want to go
-st.subheader("Please enter the locations you would like to reserve")
+st.subheader("Enter the locations you would like to reserve")
 firstLocation = st.text_input(label = "firstLocation", placeholder="Input your first location here", label_visibility="hidden")
 secondLocation = st.text_input(label = "secondLocation", placeholder="Input your second location here", label_visibility="hidden")
 thirdLocation = st.text_input(label = "thirdLocation", placeholder="Input your third location here", label_visibility="hidden")
 locations = [firstLocation, secondLocation, thirdLocation]
 
-st.subheader("Please enter a budget per person")
+st.subheader("Enter a budget per person")
 budget = st.number_input(label="Enter the budget per person", label_visibility="hidden")
+st.subheader("Enter the email address of the primary person you would like to invite")
+email = st.text_input(label = "email", placeholder="Input your email here", label_visibility="hidden")
 st.divider()
 
 
@@ -64,13 +82,16 @@ st.divider()
 
 # Display the chosen date and time slots, this would need to go 
 # into whatever database or whatever we are using
-if st.button('Confirm Reservation'):
+if st.button('Confirm Reservation', use_container_width=True, type = "primary"):
     
     if (len(selected_time_slots) == 0):
         st.error("You must select at least one time slot")
+    elif is_valid_email(email) == False:
+        st.error("You must enter a valid email address")
     else:
         st.write("Reservation Date: ", selected_date)
         st.write("Time Slots: ", selected_time_slots)
         st.write("Locations: ", locations)
         st.write("Budget: ", budget)
+        st.write("Email: ", email)
         st.toast("Your invitations have been sent out!")
