@@ -1,6 +1,13 @@
 import datetime
 import streamlit as st
 import re
+from email import *
+import uuid
+
+def generate_UUID() -> str:
+    # Generate a unique UUID
+    unique_id = uuid.uuid4()
+    return str(unique_id)
 
 
 # Ignore this, it is just page setup boilerplate
