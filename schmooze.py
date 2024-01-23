@@ -96,5 +96,18 @@ def mainPage():
             st.write("Email: ", email)
             st.toast("Your invitations have been sent out!")
 
+def renderVotingPage():
+    st.title("Voting Page")
+    st.subheader("Cast Your Vote")
 
-mainPage()
+    st.subheader("Select Reservation Time")
+
+    st.subheader("Select Option")
+    st.selectbox("Option 1", ["Option 1", "Option 2", "Option 3"])
+
+def main():
+    if st.query_params.get("uuid") == None:
+        mainPage()
+    else:
+        renderVotingPage()
+main()
