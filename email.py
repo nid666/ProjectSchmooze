@@ -9,23 +9,23 @@ TAG_BODY_HEADER = " invited you to an event on "
 TAG_SELECT_TIME = "Please select a time:"
 TAG_SELECT_RESERVATION = "Please select a reservation:"
 
-def get_HTML(locations: dict, times: dict) -> str:
+def get_HTML(locations: dict, times: list) -> str:
     html = f"<p>{TAG_SELECT_TIME}</p>\n"
     for t in times.keys():
-        html += f"""<p style="text-align: center;"><a href="{times[t]}"><strong>{t}</strong></a></p>\n"""
+        html += f"""<p style="text-align: center;"><strong>{t}</strong></p>\n"""
     html += f"<p>&nbsp;</p>\n<p>{TAG_SELECT_RESERVATION}</p>\n"
     for l in locations.keys():
-        html += f"""<p style="text-align: center;"><img src="{locations[l][1]}" alt=""/></p>
-<p style="text-align: center;"><a href="{locations[l][0]}">{l}</a></p>\n\n"""
+        html += f"""<p style="text-align: center;"><img src="{locations[l]}" alt=""/></p>
+<p style="text-align: center;">{l}</p>\n\n"""
     return f"<html>\n<body>\n{html}</body>\n</html>"
 
-def get_RAW(locations: dict, times: dict) -> str:
+def get_RAW(locations: dict, times: list) -> str:
     raw = f"{TAG_SELECT_TIME}\n\n"
-    for t in times.keys():
-        raw += f"{t}: {times[t]}\n"
+    for t in times:
+        raw += f"{t}\n"
     raw += f"\n{TAG_SELECT_RESERVATION}\n\n"
     for l in locations.keys():
-        raw += f"{l} ({locations[l][1]}):\n{locations[l][0]}\n\n"
+        raw += f"{l}: {locations[l]}\n\n"
     return raw
     
 def email(ADDRESS="", PASSWORD="", subject="", email_raw="", email_html="", Bcc=True, recipients=[]) -> bool:
@@ -57,10 +57,9 @@ def email(ADDRESS="", PASSWORD="", subject="", email_raw="", email_html="", Bcc=
 
     return True
 
-def send_email(SENDER:str, DATE: str, RECIPIENTS: list, locations: dict, times: dict) -> bool:
+def send_email(SENDER:str, DATE: str, RECIPIENTS: list, locations: dict, times: list) -> bool:
     # recipients is a list of recipient's email addresses
-    # locations dict format: {reservation_name: [voting_link, image_link], ...}
-    # times dict format: {time: voting_link, ...}
+    # locations: {location: image_link, ...}
     
     SUBJECT = f"[{TAG_PROGRAM_NAME}] {SENDER}{TAG_SUBJECT}{DATE}!"
     RAW = f"{SENDER}{TAG_SUBJECT}{DATE}.\n\n"
@@ -72,5 +71,5 @@ def send_email(SENDER:str, DATE: str, RECIPIENTS: list, locations: dict, times: 
 
 
 print("starting")
-send_email("DEAN B.", "12/29/04", ['sid77449@gmail.com', 'npcasco22@gmail.com', 'dnnbaq@gmail.com', 'dlb330@scarletmail.rutgers.edu'], {"Five Guys": ['youtube.com', "https://s3-media0.fl.yelpcdn.com/bphoto/TYd2IE1UKNlAWwCyLmILmA/348s.jpg"], "Subway": ['youtube.com', "https://a.mktgcdn.com/p/kcIdWEAbf_C1nNLIlVecIVGtR48A6MLeiSCbTY_QoJE/1050x906.jpg"]}, {"11:00 AM": "youtube.com", "01:30 PM": "youtube.com"})
+send_email("DEAN B.", "12/29/04", ['dlb330@scarletmail.rutgers.edu'], {"Five Guys": ['youtube.com', "https://s3-media0.fl.yelpcdn.com/bphoto/TYd2IE1UKNlAWwCyLmILmA/348s.jpg"], "Subway": ['youtube.com', "https://a.mktgcdn.com/p/kcIdWEAbf_C1nNLIlVecIVGtR48A6MLeiSCbTY_QoJE/1050x906.jpg"]}, {"11:00 AM": "youtube.com", "01:30 PM": "youtube.com"})
 print("finished")

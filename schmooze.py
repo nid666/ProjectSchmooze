@@ -4,11 +4,27 @@ import re
 from email import *
 import uuid
 
+JSON_FILE = "events.json"
+
 def generate_UUID() -> str:
     # Generate a unique UUID
     unique_id = uuid.uuid4()
     return str(unique_id)
 
+def read_json():
+    try:
+        with open(JSON_FILE, 'r') as file:
+            return json.load(file)
+    except Exception as e:
+        print(f"Error reading JSON file: {e}")
+        return None
+
+def write_json(key, dictionary):
+    try:
+        with open(JSON_FILE, 'w') as file:
+            json.dump({key: dictionary}, file, indent=4)
+    except Exception as e:
+        print(f"Error writing to JSON file: {e}")
 
 # Ignore this, it is just page setup boilerplate
 st.set_page_config(
@@ -80,6 +96,8 @@ def mainPage():
     budget = st.number_input(label="Enter the budget per person", label_visibility="hidden")
     st.subheader("Enter the email address of the primary person you would like to invite")
     email = st.text_input(label = "email", placeholder="Input your email here", label_visibility="hidden")
+    # CHANGE 'email' VARIABLE TO BE LIST
+    emails = [email] #TEMPORARY HANDLING OF MULTIPLE RECIPIENTS
     st.divider()
 
 
@@ -96,12 +114,21 @@ def mainPage():
         elif is_valid_email(email) == False:
             st.error("You must enter a valid email address")
         else:
-            st.write("Reservation Date: ", selected_date)
-            st.write("Time Slots: ", selected_time_slots)
-            st.write("Locations: ", locations)
-            st.write("Budget: ", budget)
-            st.write("Email: ", email)
-            st.toast("Your invitations have been sent out!")
+            uuid = generate_UUID()
+
+            location_images = ["placeholder_link.com" for _ in range(len(locations))]
+            locations_dict = {key: value for key, value in zip(locations, location_images)}
+            
+            event = {"uuid":uuid,
+                     "date":selected_date,
+                     "times":selected_time_slots,
+                     "locations":locations_dict,
+                     "budget":budget,
+                     "email", emails}
+            write_json(uuid, event)
+            
+            send_email(email, selected_date, emails, locations_dict, selected_time_slots)
+            
 
 def renderVotingPage():
     st.title("Voting Page")
