@@ -4,6 +4,7 @@ import re
 import schmail as notify
 import json
 import uuid
+import pickle
 
 JSON_FILE = "events.json"
 
@@ -19,6 +20,18 @@ def read_json():
     except Exception as e:
         print(f"Error reading JSON file: {e}")
         return None
+
+def read_pickle(uuid):
+    filename = f'{uuid}.pkl'
+    with open(filename, 'rb') as file:  # 'rb' mode is for reading in binary format
+        data = pickle.load(file)
+    return data
+
+
+def write_pickle(uuid, event):
+    filename = f'{uuid}.pkl'  # The file will have a .pkl extension
+    with open(filename, 'wb') as file:  # 'wb' mode is for writing in binary format
+        pickle.dump(event, file)
 
 def write_json(key, dictionary):
     try:
@@ -127,7 +140,7 @@ def mainPage():
                      "budget":budget,
                      "email": emails}
             
-            write_json(uuid, event)
+            write_pickle(uuid, event)
             
             notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
             
