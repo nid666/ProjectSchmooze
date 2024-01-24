@@ -11,7 +11,7 @@ TAG_SELECT_RESERVATION = "Please select a reservation:"
 
 def get_HTML(locations: dict, times: list) -> str:
     html = f"<p>{TAG_SELECT_TIME}</p>\n"
-    for t in times.keys():
+    for t in times:
         html += f"""<p style="text-align: center;"><strong>{t}</strong></p>\n"""
     html += f"<p>&nbsp;</p>\n<p>{TAG_SELECT_RESERVATION}</p>\n"
     for l in locations.keys():
@@ -57,7 +57,7 @@ def email(ADDRESS="", PASSWORD="", subject="", email_raw="", email_html="", Bcc=
 
     return True
 
-def send_email(SENDER:str, DATE: str, RECIPIENTS: list, locations: dict, times: list) -> bool:
+def send_email(SENDER:str, DATE: str, RECIPIENTS: list, BCC: bool, locations: dict, times: list) -> bool:
     # recipients is a list of recipient's email addresses
     # locations: {location: image_link, ...}
     
@@ -67,9 +67,4 @@ def send_email(SENDER:str, DATE: str, RECIPIENTS: list, locations: dict, times: 
     HTML = f"<p>{SENDER}{TAG_SUBJECT}{DATE}.</p>\n"
     HTML += get_HTML(locations, times)
     
-    return email(ADDRESS=PRG_EMAIL, PASSWORD=PRG_PASS, subject=SUBJECT, email_raw=RAW, email_html=HTML, recipients=RECIPIENTS)
-
-
-print("starting")
-send_email("DEAN B.", "12/29/04", ['dlb330@scarletmail.rutgers.edu'], {"Five Guys": ['youtube.com', "https://s3-media0.fl.yelpcdn.com/bphoto/TYd2IE1UKNlAWwCyLmILmA/348s.jpg"], "Subway": ['youtube.com', "https://a.mktgcdn.com/p/kcIdWEAbf_C1nNLIlVecIVGtR48A6MLeiSCbTY_QoJE/1050x906.jpg"]}, {"11:00 AM": "youtube.com", "01:30 PM": "youtube.com"})
-print("finished")
+    return email(ADDRESS=PRG_EMAIL, PASSWORD=PRG_PASS, subject=SUBJECT, email_raw=RAW, email_html=HTML, Bcc=BCC, recipients=RECIPIENTS)
