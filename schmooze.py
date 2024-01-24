@@ -1,7 +1,7 @@
 import datetime
 import streamlit as st
 import re
-from email import *
+from schmail import * as 
 import uuid
 
 JSON_FILE = "events.json"
@@ -124,7 +124,7 @@ def mainPage():
                      "times":selected_time_slots,
                      "locations":locations_dict,
                      "budget":budget,
-                     "email", emails}
+                     "email": emails}
             write_json(uuid, event)
             
             send_email(email, selected_date, emails, locations_dict, selected_time_slots)
