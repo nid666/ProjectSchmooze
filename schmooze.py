@@ -2,6 +2,7 @@ import datetime
 import streamlit as st
 import re
 import schmail as notify
+import json
 import uuid
 
 JSON_FILE = "events.json"
@@ -125,6 +126,7 @@ def mainPage():
                      "locations":locations_dict,
                      "budget":budget,
                      "email": emails}
+            
             write_json(uuid, event)
             
             notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
