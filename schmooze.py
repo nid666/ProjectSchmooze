@@ -128,14 +128,14 @@ def mainPage():
         st.session_state['locations'].append(thirdLocation)
 
 
-    if button('➕ Add additional locations', type = "primary", key="addLocationToggle"):
+    if st.button('➕ Add additional locations', type = "primary", key="addLocationToggle"):
         #numAdditionalLocations = st.number_input(label = "Enter Number of Additional Locations", value = 1, format = "%d", step = 1, max_value = 10)
         st.session_state['num_additional_locations'] += 1
-        for i in range(st.session_state['num_additional_locations']):
-            additional_location = st.text_input("Input your additional location here", key=f"additionalLocation{i}")
-            # Update the session state list with the additional locations
-            if additional_location and additional_location not in st.session_state['locations']:
-                st.session_state['locations'].append(additional_location)
+    for i in range(st.session_state['num_additional_locations']):
+        additional_location = st.text_input("Input your additional location here", key=f"additionalLocation{i}")
+        # Update the session state list with the additional locations
+        if additional_location and additional_location not in st.session_state['locations']:
+            st.session_state['locations'].append(additional_location)
             
 
     st.subheader("Enter a budget per person")
