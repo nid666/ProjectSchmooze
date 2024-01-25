@@ -6,6 +6,7 @@ import json
 import uuid
 import pickle
 import os
+from streamlit_extras.stateful_button import button 
 
 PKL_PATH_DIR = "events"
 
@@ -103,15 +104,40 @@ def mainPage():
     st.divider()
     # Allowing to choose the places you want to go
 
+    #This creates a stateful locations array that we can use to store the locations dynamically
+    if 'locations' not in st.session_state:
+        st.session_state['locations'] = []
+
+
+
+
     #TODO - Add option to select more than one location
 
     st.subheader("Enter the locations you would like to reserve")
-    firstLocation = st.text_input(label = "firstLocation", placeholder="Input your first location here", label_visibility="hidden")
-    secondLocation = st.text_input(label = "secondLocation", placeholder="Input your second location here", label_visibility="hidden")
-    thirdLocation = st.text_input(label = "thirdLocation", placeholder="Input your third location here", label_visibility="hidden")
-    if st.button('➕ Add additional locations', type = "primary"):
-        numAdditionalLocations = st.number_input(label = "additional locations", value = 0, format = "%d", label_visibility="hidden", step = 1)
-    locations = [firstLocation, secondLocation, thirdLocation]
+    firstLocation = st.text_input(label="firstLocation", placeholder="Input your first location here", key="firstLocation", label_visibility="hidden")
+    secondLocation = st.text_input(label="secondLocation", placeholder="Input your second location here", key="secondLocation", label_visibility="hidden")
+    thirdLocation = st.text_input(label="thirdLocation", placeholder="Input your third location here", key="thirdLocation", label_visibility="hidden")
+
+    # Update the first three locations if they are not empty
+    if firstLocation:
+        st.session_state['locations'].append(firstLocation)
+    if secondLocation:
+        st.session_state['locations'].append(secondLocation)
+    if thirdLocation:
+        st.session_state['locations'].append(thirdLocation)
+
+    if button('➕ Add additional locations', type = "primary", key="addLocationToggle"):
+        numAdditionalLocations = st.number_input(label = "Enter Number of Additional Locations", value = 1, format = "%d", step = 1, max_value = 10)
+
+        for i in range(numAdditionalLocations):
+            additional_location = st.text_input(label="additionalLocation", placeholder="Input your additional location here", key=f"additionalLocation{i}", label_visibility="hidden")
+            # Update the session state list with the additional locations
+            if additional_location:
+                # Ensure unique keys for each location
+                while len(st.session_state['locations']) <= i + 3:
+                    st.session_state['locations'].append('')
+                st.session_state['locations'][i + 3] = additional_location
+            
 
     st.subheader("Enter a budget per person")
     budget = st.number_input(label="Enter the budget per person", label_visibility="hidden")
@@ -137,18 +163,20 @@ def mainPage():
         else:
             uuid = generate_UUID()
 
-            location_images = ["placeholder_link.com" for _ in range(len(locations))]
-            locations_dict = {key: value for key, value in zip(locations, location_images)}
+            #location_images = ["placeholder_link.com" for _ in range(len(st.session_state.get(locations)))]
+            #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
             
             event = {"uuid":uuid,
                      "date":selected_date,
                      "times":selected_time_slots,
-                     "locations":locations_dict,
+                     "locations":st.session_state['locations'],
                      "budget":budget,
                      "email": emails}
-            
+            st.write(event)
             serialize_event(event)
-            notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
+
+
+            #notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
             
 
 def renderVotingPage():
