@@ -27,6 +27,12 @@ def serialize_event(event_dict: dict) -> None:
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def unserialize_event(uuid:str) -> dict:
+    path = PKL_PATH_FILE(uuid)
+    with open(path, 'rb') as file:
+        data = pickle.load(file)
+        return data
+    
 def unserialize_events() -> dict:
     aggregated_dict = {}
     try:
@@ -107,8 +113,7 @@ def mainPage():
     #This creates a stateful locations array that we can use to store the locations dynamically
     if 'locations' not in st.session_state:
         st.session_state['locations'] = []
-    if 'num_additional_locations' not in st.session_state:
-        st.session_state['num_additional_locations'] = 0
+
 
 
 
@@ -120,22 +125,24 @@ def mainPage():
     thirdLocation = st.text_input(label="thirdLocation", placeholder="Input your third location here", key="thirdLocation", label_visibility="hidden")
 
     # Update the first three locations if they are not empty
-    if firstLocation and firstLocation not in st.session_state['locations']:
+    if firstLocation:
         st.session_state['locations'].append(firstLocation)
-    if secondLocation and secondLocation not in st.session_state['locations']:
+    if secondLocation:
         st.session_state['locations'].append(secondLocation)
-    if thirdLocation and thirdLocation not in st.session_state['locations']:
+    if thirdLocation:
         st.session_state['locations'].append(thirdLocation)
 
+    if button('➕ Add additional locations', type = "primary", key="addLocationToggle"):
+        numAdditionalLocations = st.number_input(label = "Enter Number of Additional Locations", value = 1, format = "%d", step = 1, max_value = 10)
 
-    if st.button('➕ Add additional locations', type = "primary", key="addLocationToggle"):
-        #numAdditionalLocations = st.number_input(label = "Enter Number of Additional Locations", value = 1, format = "%d", step = 1, max_value = 10)
-        st.session_state['num_additional_locations'] += 1
-    for i in range(st.session_state['num_additional_locations']):
-        additional_location = st.text_input("Input your additional location here", key=f"additionalLocation{i}")
-        # Update the session state list with the additional locations
-        if additional_location and additional_location not in st.session_state['locations']:
-            st.session_state['locations'].append(additional_location)
+        for i in range(numAdditionalLocations):
+            additional_location = st.text_input(label="additionalLocation", placeholder="Input your additional location here", key=f"additionalLocation{i}", label_visibility="hidden")
+            # Update the session state list with the additional locations
+            if additional_location:
+                # Ensure unique keys for each location
+                while len(st.session_state['locations']) <= i + 3:
+                    st.session_state['locations'].append('')
+                st.session_state['locations'][i + 3] = additional_location
             
 
     st.subheader("Enter a budget per person")
@@ -178,11 +185,18 @@ def mainPage():
             #notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
             
 
-def renderVotingPage():
+def renderVotingPage(uuid:str):
+
+    event_dict = unserialize_event(uuid)
+    
     st.title("Voting Page")
     st.subheader("Cast Your Vote")
 
+    st.tabs(event_dict["locations"])
+
     st.subheader("Select Reservation Time")
+
+    st.tabs(event_dict["times"])
 
     st.subheader("Select Option")
     st.selectbox("Option 1", ["Option 1", "Option 2", "Option 3"])
