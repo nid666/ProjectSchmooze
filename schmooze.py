@@ -18,7 +18,7 @@ def PKL_PATH_FILE(uuid:str) -> str:
     return os.path.join(PKL_PATH_DIR, f"{uuid}.pkl")
 
 def serialize_event(event_dict: dict) -> None:
-    file = PKL_PATH_FILE(event_dict["uuid"])
+    file_path = PKL_PATH_FILE(event_dict["uuid"])
     try:
         with open(file_path, 'wb') as file:
             pickle.dump(event_dict, file)
