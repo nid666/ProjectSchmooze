@@ -14,8 +14,8 @@ $ streamlit run schmooze.py
 This will open a new tab in your default browser with the webapp running.
 
 ## Phase 1 ToDo:
-- [ ] Allow to select/input/choose restaurants (sid)
-- [ ] Budget constraints per person (sid)
+- [x] Allow to select/input/choose restaurants (sid)
+- [x] Budget constraints per person (sid)
 - [x] Select Entertainment Options (sid)
 - [ ] Voting System in email link (Noah)
 - [x] Send out emails with voting links (Dean)
