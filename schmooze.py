@@ -86,15 +86,12 @@ def mainPage():
 
     # Select a date using streamlit date input
     st.subheader("Select Reservation Date")
-    selected_date = st.date_input("Select Reservation Date", datetime.date.today(), label_visibility="hidden")
-
+    selected_date = st.date_input(label="Select Reservation Date", value = datetime.date.today(), label_visibility="hidden")
     # Defining the time slots im selecting between, this can be changed to the time picker if we want any time to be selectable
     time_slots = ["09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", 
                 "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", 
                 "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"]
 
-
-    st.subheader("Select Reservation Date")
     # Select up to 3 time slots
     selected_time_slots = st.multiselect("You may choose up to 3 time slots", time_slots)
 
@@ -105,6 +102,9 @@ def mainPage():
 
     st.divider()
     # Allowing to choose the places you want to go
+
+    #TODO - Add option to select more than one location
+
     st.subheader("Enter the locations you would like to reserve")
     firstLocation = st.text_input(label = "firstLocation", placeholder="Input your first location here", label_visibility="hidden")
     secondLocation = st.text_input(label = "secondLocation", placeholder="Input your second location here", label_visibility="hidden")
