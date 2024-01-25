@@ -109,6 +109,8 @@ def mainPage():
     firstLocation = st.text_input(label = "firstLocation", placeholder="Input your first location here", label_visibility="hidden")
     secondLocation = st.text_input(label = "secondLocation", placeholder="Input your second location here", label_visibility="hidden")
     thirdLocation = st.text_input(label = "thirdLocation", placeholder="Input your third location here", label_visibility="hidden")
+    if st.button('➕ Add additional locations', type = "primary"):
+        numAdditionalLocations = st.number_input(label = "additional locations", value = 0, format = "%d", label_visibility="hidden", step = 1)
     locations = [firstLocation, secondLocation, thirdLocation]
 
     st.subheader("Enter a budget per person")
