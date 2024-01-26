@@ -193,6 +193,36 @@ def get_manager():
 cookie_manager = get_manager()
 
 def renderRevotePage():
+    # Check for existing cookies
+    has_voted = cookie_manager.get("voted")
+
+
+
+    # Location Voting
+    loc_cols = st.columns(len(locations))
+    for c, l in zip(loc_cols, locations):
+        with c:
+            st.header(l)
+            if current_location == l:
+                st.write("Previously Selected")
+                location_selected = True
+            elif st.button(label="Vote for " + l, key=f"vote_{l}"):
+                location_selected = True
+                cookie_manager.set("current_location", l)
+
+    # Time Selection
+    tim_cols = st.columns(len(times))
+    for t, time in zip(tim_cols, times):
+        with t:
+            st.header(time)
+            if current_time == time:
+                st.write("Previously Selected")
+                time_selected = True
+            elif st.button(label="Select time " + time, key=f"select_{time}"):
+                time_selected = True
+                cookie_manager.set("current_time", time)
+
+                
     st.write('voted')
 
 def renderVotingPage():
@@ -217,48 +247,14 @@ def renderVotingPage():
 
     results = cookies['results']
 
+    # CHANGE THE COOKIES
+
+    cookie_manager.set('results', results)
+
 
     #Checking to see if they voted to render the correct page
     if results['votedStatus'] == True:
-        
-        locations = event_dict["locations"]
-        loc_cols = st.columns(len(locations))
-
-        for c, l in zip(loc_cols, locations):
-            with c:
-                st.header(l)
-                if st.button(label = "Select location " + l, key=f"vote_{l}"):
-                    st.session_state['selected_location'] = l
-                    st.write(f"Location {l} Selected")
-
-        st.divider()
-
-        st.subheader("Select Reservation Time")
-
-        times = event_dict["times"]
-        tim_cols = st.columns(len(times))
-
-        for t, l in zip(tim_cols, times):
-            with t:
-                st.header(l)
-                if st.button(label= "Select", key=f"select_{l}"):
-                    st.session_state['selected_time'] = l
-                    st.write(f"Time {l} Selected")
-
-        st.divider()
-
-        if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
-            # Capture the votes and uuid in a dictionary
-            vote_result = {
-                "votedStatus": True,
-                "uuid": uuid,
-                "selected_location": st.session_state['selected_location'],
-                "selected_time": st.session_state['selected_time']
-            }
-            # Convert the dictionary to a JSON object
-            vote_json = json.dumps(vote_result)
-            # You can display the JSON, write it to a file, or send it somewhere
-            st.json(vote_json)
+        renderRevotePage()
         
     else:
         st.write(cookies)
