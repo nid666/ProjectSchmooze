@@ -192,6 +192,8 @@ def get_manager():
 
 cookie_manager = get_manager()
 
+def renderRevotePage():
+    st.write('voted')
 
 def renderVotingPage():
     uuid = st.query_params.get("uuid")
@@ -201,53 +203,65 @@ def renderVotingPage():
 
     st.subheader("Cast Your Vote")
 
+    #checking if the cookies exist
     cookies = cookie_manager.get_all()
+    if cookies == None:
+        cookie_manager.set("results", {"votedStatus": False})
 
-    # Initialize session state variables
-    if 'selected_location' not in st.session_state:
-        st.session_state['selected_location'] = None
+    results = cookies['results']
 
-    if 'selected_time' not in st.session_state:
-        st.session_state['selected_time'] = None
 
-    locations = event_dict["locations"]
-    loc_cols = st.columns(len(locations))
+    #Checking to see if they voted to render the correct page
+    if results['votedStatus'] == True:
+        renderRevotePage()
+    else:
+        st.write(cookies)
+        # Initialize session state variables
+        if 'selected_location' not in st.session_state:
+            st.session_state['selected_location'] = None
 
-    for c, l in zip(loc_cols, locations):
-        with c:
-            st.header(l)
-            if st.button(label = "Select location " + l, key=f"vote_{l}"):
-                st.session_state['selected_location'] = l
-                st.write(f"Location {l} Selected")
+        if 'selected_time' not in st.session_state:
+            st.session_state['selected_time'] = None
 
-    st.divider()
+        locations = event_dict["locations"]
+        loc_cols = st.columns(len(locations))
 
-    st.subheader("Select Reservation Time")
+        for c, l in zip(loc_cols, locations):
+            with c:
+                st.header(l)
+                if st.button(label = "Select location " + l, key=f"vote_{l}"):
+                    st.session_state['selected_location'] = l
+                    st.write(f"Location {l} Selected")
 
-    times = event_dict["times"]
-    tim_cols = st.columns(len(times))
+        st.divider()
 
-    for t, l in zip(tim_cols, times):
-        with t:
-            st.header(l)
-            if st.button(label= "Select", key=f"select_{l}"):
-                st.session_state['selected_time'] = l
-                st.write(f"Time {l} Selected")
+        st.subheader("Select Reservation Time")
 
-    st.divider()
+        times = event_dict["times"]
+        tim_cols = st.columns(len(times))
 
-    if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
-        # Capture the votes and uuid in a dictionary
-        vote_result = {
-            "votedStatus": True,
-            "uuid": uuid,
-            "selected_location": st.session_state['selected_location'],
-            "selected_time": st.session_state['selected_time']
-        }
-        # Convert the dictionary to a JSON object
-        vote_json = json.dumps(vote_result)
-        # You can display the JSON, write it to a file, or send it somewhere
-        st.json(vote_json)
+        for t, l in zip(tim_cols, times):
+            with t:
+                st.header(l)
+                if st.button(label= "Select", key=f"select_{l}"):
+                    st.session_state['selected_time'] = l
+                    st.write(f"Time {l} Selected")
+
+        st.divider()
+
+        if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
+            # Capture the votes and uuid in a dictionary
+            vote_result = {
+                "votedStatus": True,
+                "uuid": uuid,
+                "selected_location": st.session_state['selected_location'],
+                "selected_time": st.session_state['selected_time']
+            }
+            cookie_manager.set("results", vote_result)
+            # Convert the dictionary to a JSON object
+            vote_json = json.dumps(vote_result)
+            # You can display the JSON, write it to a file, or send it somewhere
+            st.json(vote_json)
 
 
 
