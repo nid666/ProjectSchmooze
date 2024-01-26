@@ -112,7 +112,7 @@ def mainPage():
 
     #This creates a stateful locations array that we can use to store the locations dynamically
     if 'locations' not in st.session_state:
-        st.session_state['locations'] = []
+        st.session_state['locations'] = [0, 0 ,0]
 
 
 
@@ -126,11 +126,11 @@ def mainPage():
 
     # Update the first three locations if they are not empty
     if firstLocation:
-        st.session_state['locations'].append(firstLocation)
+        st.session_state['locations'][0] = firstLocation
     if secondLocation:
-        st.session_state['locations'].append(secondLocation)
+        st.session_state['locations'][1] = secondLocation
     if thirdLocation:
-        st.session_state['locations'].append(thirdLocation)
+        st.session_state['locations'][2] = thirdLocation
 
     if button('➕ Add additional locations', type = "primary", key="addLocationToggle"):
         numAdditionalLocations = st.number_input(label = "Enter Number of Additional Locations", value = 1, format = "%d", step = 1, max_value = 10)
@@ -185,8 +185,8 @@ def mainPage():
             #notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
             
 
-def renderVotingPage(uuid:str):
-
+def renderVotingPage():
+    uuid = st.query_params.get("uuid")
     event_dict = unserialize_event(uuid)
     
     st.title("Voting Page")
