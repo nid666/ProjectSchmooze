@@ -7,6 +7,7 @@ import uuid
 import pickle
 import os
 from streamlit_extras.stateful_button import button 
+import extra_streamlit_components as stx
 
 PKL_PATH_DIR = "events"
 
@@ -185,6 +186,13 @@ def mainPage():
 
             #notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
             
+#might need to include st.cache_data() here if there are performance issues
+def get_manager():
+    return stx.CookieManager()
+
+cookie_manager = get_manager()
+
+
 
 def renderVotingPage():
     uuid = st.query_params.get("uuid")
@@ -215,6 +223,20 @@ def renderVotingPage():
 
     st.subheader("Select Option")
     st.selectbox("Option 1", ["Option 1", "Option 2", "Option 3"])
+
+
+
+    # st.subheader("All Cookies:")
+
+    # cookie_manager.set("voted", "True")
+
+
+    # cookies = cookie_manager.get_all()
+    # st.write(cookies)
+    
+    # if st.button("Cast Final Vote"):
+    #     st.write("Final Vote Casted")
+        
 
 def main():
     if st.query_params.get("uuid") == None:
