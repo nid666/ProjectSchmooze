@@ -201,6 +201,8 @@ def renderVotingPage():
 
     st.subheader("Cast Your Vote")
 
+    cookies = cookie_manager.get_all()
+
     # Initialize session state variables
     if 'selected_location' not in st.session_state:
         st.session_state['selected_location'] = None
@@ -237,6 +239,7 @@ def renderVotingPage():
     if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
         # Capture the votes and uuid in a dictionary
         vote_result = {
+            "votedStatus": True,
             "uuid": uuid,
             "selected_location": st.session_state['selected_location'],
             "selected_time": st.session_state['selected_time']
@@ -245,15 +248,14 @@ def renderVotingPage():
         vote_json = json.dumps(vote_result)
         # You can display the JSON, write it to a file, or send it somewhere
         st.json(vote_json)
+
+
+
     """ 
     # Check for existing cookies
     has_voted = cookie_manager.get("voted")
-    current_location = cookie_manager.get("current_location")
-    current_time = cookie_manager.get("current_time")
 
-    # Initialize variables to track user selections
-    location_selected = False
-    time_selected = False
+
 
     # Location Voting
     loc_cols = st.columns(len(locations))
