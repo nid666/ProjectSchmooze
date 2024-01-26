@@ -181,6 +181,7 @@ def mainPage():
             st.write(event)
             serialize_event(event)
 
+            renderVotingPage()
 
             #notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
             
@@ -192,11 +193,21 @@ def renderVotingPage():
     st.title("Voting Page")
     st.subheader("Cast Your Vote")
 
-    st.tabs(event_dict["locations"])
+    locations = event_dict["locations"]
+    loc_cols = st.columns(len(locations))
+
+    for c, l in zip(loc_cols, locations):
+        with c:
+            st.header(l)
 
     st.subheader("Select Reservation Time")
 
-    st.tabs(event_dict["times"])
+    times = event_dict["times"]
+    tim_cols = st.columns(len(times))
+
+    for t, l in zip(tim_cols, locations):
+        with t:
+            st.header(l)
 
     st.subheader("Select Option")
     st.selectbox("Option 1", ["Option 1", "Option 2", "Option 3"])
