@@ -193,8 +193,9 @@ def get_manager():
 cookie_manager = get_manager()
 
 
-
 def renderVotingPage():
+    cookie_manager = stx.CookieManager()
+
     uuid = st.query_params.get("uuid")
     event_dict = unserialize_event(uuid)
     
@@ -202,27 +203,56 @@ def renderVotingPage():
     st.subheader("Cast Your Vote")
 
     locations = event_dict["locations"]
-    loc_cols = st.columns(len(locations))
+    times = event_dict["times"]
+    
+    # Check for existing cookies
+    has_voted = cookie_manager.get("voted")
+    current_location = cookie_manager.get("current_location")
+    current_time = cookie_manager.get("current_time")
 
+    # Initialize variables to track user selections
+    location_selected = False
+    time_selected = False
+
+    # Location Voting
+    loc_cols = st.columns(len(locations))
     for c, l in zip(loc_cols, locations):
         with c:
             st.header(l)
-            if st.button(label = "Vote for " + l, key=f"vote_{l}"):
-                st.write("Vote Casted")
+            if current_location == l:
+                st.write("Previously Selected")
+                location_selected = True
+            elif st.button(label="Vote for " + l, key=f"vote_{l}"):
+                location_selected = True
+                cookie_manager.set("current_location", l)
 
-    st.subheader("Select Reservation Time")
-
-    times = event_dict["times"]
+    # Time Selection
     tim_cols = st.columns(len(times))
-
-    for t, l in zip(tim_cols, locations):
+    for t, time in zip(tim_cols, times):
         with t:
-            st.header(l)
-            if st.button(label= "Select time " + l, key=f"select_{l}"):
-                st.write("Time Selected")
+            st.header(time)
+            if current_time == time:
+                st.write("Previously Selected")
+                time_selected = True
+            elif st.button(label="Select time " + time, key=f"select_{time}"):
+                time_selected = True
+                cookie_manager.set("current_time", time)
 
-    st.subheader("Select Option")
-    st.selectbox("Option 1", ["Option 1", "Option 2", "Option 3"])
+    # Check if a vote or revote is to be cast
+    if location_selected or time_selected:
+        if has_voted:
+            revote(cookie_manager)
+        else:
+            vote(cookie_manager)
+
+def vote(cookie_manager):
+    # Handle new vote logic
+    st.write("Handling new vote...")
+    cookie_manager.set("voted", "True")
+
+def revote(cookie_manager):
+    # Handle revote logic
+    st.write("Handling revote...")
 
 
 
