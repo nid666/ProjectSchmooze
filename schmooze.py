@@ -204,9 +204,16 @@ def renderVotingPage():
     st.subheader("Cast Your Vote")
 
     #checking if the cookies exist
-    cookies = cookie_manager.get_all()
+    cookies = cookie_manager.get("results")
     if cookies == None:
-        cookie_manager.set("results", {"votedStatus": False})
+        vote_result = {
+                "votedStatus": False,
+                "uuid": uuid,
+                "selected_location": None,
+                "selected_time": None
+            }
+        cookie_manager.set("results", vote_result)
+    cookies = cookie_manager.get_all()
 
     results = cookies['results']
 
