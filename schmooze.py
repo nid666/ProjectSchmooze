@@ -220,7 +220,46 @@ def renderVotingPage():
 
     #Checking to see if they voted to render the correct page
     if results['votedStatus'] == True:
-        renderRevotePage()
+        
+        locations = event_dict["locations"]
+        loc_cols = st.columns(len(locations))
+
+        for c, l in zip(loc_cols, locations):
+            with c:
+                st.header(l)
+                if st.button(label = "Select location " + l, key=f"vote_{l}"):
+                    st.session_state['selected_location'] = l
+                    st.write(f"Location {l} Selected")
+
+        st.divider()
+
+        st.subheader("Select Reservation Time")
+
+        times = event_dict["times"]
+        tim_cols = st.columns(len(times))
+
+        for t, l in zip(tim_cols, times):
+            with t:
+                st.header(l)
+                if st.button(label= "Select", key=f"select_{l}"):
+                    st.session_state['selected_time'] = l
+                    st.write(f"Time {l} Selected")
+
+        st.divider()
+
+        if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
+            # Capture the votes and uuid in a dictionary
+            vote_result = {
+                "votedStatus": True,
+                "uuid": uuid,
+                "selected_location": st.session_state['selected_location'],
+                "selected_time": st.session_state['selected_time']
+            }
+            # Convert the dictionary to a JSON object
+            vote_json = json.dumps(vote_result)
+            # You can display the JSON, write it to a file, or send it somewhere
+            st.json(vote_json)
+        
     else:
         st.write(cookies)
         # Initialize session state variables
