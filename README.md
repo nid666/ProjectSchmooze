@@ -25,13 +25,13 @@ This will open a new tab in your default browser with the webapp running.
 ## Phase 2 ToDo:
 - [ ] login page for the user
 - [ ] check if a restaunt is avaliable at a given time
-- [ ] Notify user if all clients have voted to finalize the reservation
-- [ ] Notify clients of confirmed reservation
+- [ ] Notify user if all clients have voted to finalize the reservation (Dean)
+- [ ] Notify clients of confirmed reservation (Dean)
 - [ ] Host it publically for demos
-- [ ] Do calendar invites in email
+- [ ] Do calendar invites in email (Dean)
 - [ ] Setup api to allow automatic booking once a vote is finalized
 - [ ] Show final result
-- [ ] Fix any bugs in email system
+- [ ] Fix any bugs in email system (Dean)
 - [ ] Fix any bugs in voting page
 
 
