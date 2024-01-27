@@ -1,34 +1,56 @@
 from email.message import EmailMessage
 import smtplib
+import json
+import email_bodys as body
+import events_database as edb
 
-PRG_EMAIL = "delete.bins@gmail.com"
-PRG_PASS = "gcpi mepa cxqm lqsa"
-TAG_PROGRAM_NAME = "SCHMOOZE"
-TAG_SUBJECT = " sent you an invitation on "
-TAG_BODY_HEADER = " invited you to an event on "
-TAG_SELECT_TIME = "Please select a time:"
-TAG_SELECT_RESERVATION = "Please select a reservation:"
+PATH_CREDENTIALS_FILE = "secret/creds.csv"
 
-def get_HTML(locations: dict, times: list) -> str:
-    html = f"<p>{TAG_SELECT_TIME}</p>\n"
-    for t in times:
-        html += f"""<p style="text-align: center;"><strong>{t}</strong></p>\n"""
-    html += f"<p>&nbsp;</p>\n<p>{TAG_SELECT_RESERVATION}</p>\n"
-    for l in locations.keys():
-        html += f"""<p style="text-align: center;"><img src="{locations[l]}" alt=""/></p>
-<p style="text-align: center;">{l}</p>\n\n"""
-    return f"<html>\n<body>\n{html}</body>\n</html>"
+TAG_COMPANY_NAME = "SCHMOOZE"
 
-def get_RAW(locations: dict, times: list) -> str:
-    raw = f"{TAG_SELECT_TIME}\n\n"
-    for t in times:
-        raw += f"{t}\n"
-    raw += f"\n{TAG_SELECT_RESERVATION}\n\n"
-    for l in locations.keys():
-        raw += f"{l}: {locations[l]}\n\n"
-    return raw
+def GET_CREDENTIALS():
+
+    file_path = PATH_CREDENTIALS_FILE
     
-def email(ADDRESS="", PASSWORD="", subject="", email_raw="", email_html="", Bcc=True, recipients=[]) -> bool:
+    if not os.path.exists(file_path):
+        raise ValueError(f"'{file_path}' does not exist!")
+
+    with open(file_path, 'r') as json_file:
+        data = json.load(json_file)
+
+        # 'CHECK FOR REQUIRED KEYS' START
+        has_email = False
+        has_password = False
+        key_error_msg = ""
+
+        if 'email' not in data:
+            key_error_msg += "The file does not have the 'email' key"
+        else:
+            has_email = True
+        if 'password' not in data:
+            to_append_start = "The file does not have "
+            to_append_end = "the 'password' key'"
+            if(not has_email):
+                key_error_msg += " or "
+            else:
+                key_error_msg += to_append_start
+            key_error_msg += to_append_start
+        else:
+            has_password = True
+        if (not has_email) or (not has_password):
+            raise ValueError(key_error_msg + ".")
+        # 'CHECK FOR REQUIRED KEYS' END
+
+        email = data['email']
+        password = data['password']
+
+        return (email, password)
+    
+def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", recipients=[]) -> bool:
+
+    creds = GET_CREDENTIALS()
+    ADDRESS = creds[0]
+    PASSWORD = creds[1]
     
     if ADDRESS == "" or PASSWORD == "" or email_raw == "" or recipients == None: return False
 
@@ -57,14 +79,31 @@ def email(ADDRESS="", PASSWORD="", subject="", email_raw="", email_html="", Bcc=
 
     return True
 
-def send_email(SENDER:str, DATE: str, RECIPIENTS: list, BCC: bool, locations: dict, times: list) -> bool:
-    # recipients is a list of recipient's email addresses
-    # locations: {location: image_link, ...}
+class send:
     
-    SUBJECT = f"[{TAG_PROGRAM_NAME}] {SENDER}{TAG_SUBJECT}{DATE}!"
-    RAW = f"{SENDER}{TAG_SUBJECT}{DATE}.\n\n"
-    RAW += get_RAW(locations, times)
-    HTML = f"<p>{SENDER}{TAG_SUBJECT}{DATE}.</p>\n"
-    HTML += get_HTML(locations, times)
+    def approve(uuid:str, BCC=True):
+        
+        event_dict = edb.unserialize_event(uuid)
+        subject = f"[{TAG_COMPANY_NAME}] Add your event on {event_dict['date']} to your calendar!"
+        email_raw = body.format.raw_email.get_approve()
+        email_html = body.format.html_email.get_approve()
+
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
     
-    return email(ADDRESS=PRG_EMAIL, PASSWORD=PRG_PASS, subject=SUBJECT, email_raw=RAW, email_html=HTML, Bcc=BCC, recipients=RECIPIENTS)
+    def request(uuid:str, BCC=True):
+        
+        event_dict = edb.unserialize_event(uuid)
+        subject = f"[{TAG_COMPANY_NAME}] Your event on {event_dict['date']} needs approval!"
+        email_raw = body.format.raw_email.get_request()
+        email_html = body.format.html_email.get_request()
+        
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
+    
+    def invite(uuid:str, BCC=True):
+        
+        event_dict = edb.unserialize_event(uuid)
+        subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict["date"]}!"
+        email_raw = body.format.raw_email.get_invite()
+        email_html = body.format.html_email.get_invite()
+        
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])

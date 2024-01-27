@@ -3,54 +3,9 @@ import streamlit as st
 import re
 import schmail as notify
 import json
-import uuid
-import pickle
-import os
 from streamlit_extras.stateful_button import button 
 import extra_streamlit_components as stx
-
-PKL_PATH_DIR = "events"
-
-def generate_UUID() -> str:
-    # Generate a unique UUID
-    unique_id = uuid.uuid4()
-    return str(unique_id)
-
-def PKL_PATH_FILE(uuid:str) -> str:
-    return os.path.join(PKL_PATH_DIR, f"{uuid}.pkl")
-
-def serialize_event(event_dict: dict) -> None:
-    file_path = PKL_PATH_FILE(event_dict["uuid"])
-    try:
-        with open(file_path, 'wb') as file:
-            pickle.dump(event_dict, file)
-        #print(f"Dictionary successfully serialized to {file_path}")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-def unserialize_event(uuid:str) -> dict:
-    path = PKL_PATH_FILE(uuid)
-    with open(path, 'rb') as file:
-        data = pickle.load(file)
-        return data
-    
-def unserialize_events() -> dict:
-    aggregated_dict = {}
-    try:
-        # Iterate over all files in the directory
-        for filename in os.listdir(PKL_PATH_DIR):
-            if filename.endswith('.pkl'):
-                file_path = os.path.join(PKL_PATH_DIR, filename)
-                with open(file_path, 'rb') as file:
-                    # Deserialize the contents of the pickle file
-                    data = pickle.load(file)
-                    # Use the filename without extension as the key
-                    key = os.path.splitext(filename)[0]
-                    aggregated_dict[key] = data
-        return aggregated_dict
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return {}
+import events_database as edb
 
 
 # Ignore this, it is just page setup boilerplate
@@ -168,7 +123,7 @@ def mainPage():
         elif is_valid_email(email) == False:
             st.error("You must enter a valid email address")
         else:
-            uuid = generate_UUID()
+            uuid = edb.generate_UUID()
 
             #location_images = ["placeholder_link.com" for _ in range(len(st.session_state.get(locations)))]
             #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
@@ -178,9 +133,10 @@ def mainPage():
                      "times":selected_time_slots,
                      "locations":st.session_state['locations'],
                      "budget":budget,
+                     "sender": "TEMPORARY_VALUE",
                      "email": emails}
             st.write(event)
-            serialize_event(event)
+            edb.serialize_event(event)
 
             st.toast("Invite sent successfully!")
 
@@ -227,7 +183,7 @@ def renderRevotePage():
 
 def renderVotingPage():
     uuid = st.query_params.get("uuid")
-    event_dict = unserialize_event(uuid)
+    event_dict = edb.unserialize_event(uuid)
 
     st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 
@@ -302,69 +258,13 @@ def renderVotingPage():
             cookie_manager.set("results", vote_result)
             # Convert the dictionary to a JSON object
             vote_json = json.dumps(vote_result)
+
+
+            
             # You can display the JSON, write it to a file, or send it somewhere
             st.json(vote_json)
 
 
-
-    """ 
-    # Check for existing cookies
-    has_voted = cookie_manager.get("voted")
-
-
-
-    # Location Voting
-    loc_cols = st.columns(len(locations))
-    for c, l in zip(loc_cols, locations):
-        with c:
-            st.header(l)
-            if current_location == l:
-                st.write("Previously Selected")
-                location_selected = True
-            elif st.button(label="Vote for " + l, key=f"vote_{l}"):
-                location_selected = True
-                cookie_manager.set("current_location", l)
-
-    # Time Selection
-    tim_cols = st.columns(len(times))
-    for t, time in zip(tim_cols, times):
-        with t:
-            st.header(time)
-            if current_time == time:
-                st.write("Previously Selected")
-                time_selected = True
-            elif st.button(label="Select time " + time, key=f"select_{time}"):
-                time_selected = True
-                cookie_manager.set("current_time", time)
-
-    # Check if a vote or revote is to be cast
-    if location_selected or time_selected:
-        if has_voted:
-            revote(cookie_manager)
-        else:
-            vote(cookie_manager)
-    """
-def vote(cookie_manager):
-    # Handle new vote logic
-    st.write("Handling new vote...")
-    cookie_manager.set("voted", "True")
-
-def revote(cookie_manager):
-    # Handle revote logic
-    st.write("Handling revote...")
-
-
-
-    # st.subheader("All Cookies:")
-
-    # cookie_manager.set("voted", "True")
-
-
-    # cookies = cookie_manager.get_all()
-    # st.write(cookies)
-    
-    # if st.button("Cast Final Vote"):
-    #     st.write("Final Vote Casted")
         
 
 def main():
