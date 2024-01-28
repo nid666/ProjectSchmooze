@@ -128,15 +128,19 @@ def mainPage():
             #location_images = ["placeholder_link.com" for _ in range(len(st.session_state.get(locations)))]
             #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
             
-            event = {"uuid":uuid,
-                     "date":selected_date,
-                     "times":selected_time_slots,
-                     "locations":st.session_state['locations'],
-                     "budget":budget,
-                     "sender": "TEMPORARY_VALUE",
-                     "email": emails}
+            event = edb.generate_EVENT_DICT()
+            event['uuid'] = uuid
+            event['date'] = selected_date
+            event['times'] = selected_time_slots
+            event['locations'] = st.session_state['locations']
+            event['budget'] = budget
+            event['sender'] = "TEMPORARY_VALUE" # needs organizer's email address
+            event['recipients'] = emails
+
+            edb.event.details.serialize(event)
+            
             st.write(event)
-            edb.serialize_event(event)
+            
 
             st.toast("Invite sent successfully!")
 
@@ -183,7 +187,7 @@ def renderRevotePage():
 
 def renderVotingPage():
     uuid = st.query_params.get("uuid")
-    event_dict = edb.unserialize_event(uuid)
+    event_dict = edb.event.details.unserialize(uuid)
 
     st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 

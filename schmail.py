@@ -4,7 +4,7 @@ import json
 import email_bodys as body
 import events_database as edb
 
-PATH_CREDENTIALS_FILE = "secret/creds.csv"
+PATH_CREDENTIALS_FILE = "secret/creds.json"
 
 TAG_COMPANY_NAME = "SCHMOOZE"
 
@@ -80,7 +80,8 @@ def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", recipients=[])
     return True
 
 class send:
-    
+
+    @staticmethod
     def approve(uuid:str, BCC=True):
         
         event_dict = edb.unserialize_event(uuid)
@@ -89,7 +90,8 @@ class send:
         email_html = body.format.html_email.get_approve()
 
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
-    
+
+    @staticmethod
     def request(uuid:str, BCC=True):
         
         event_dict = edb.unserialize_event(uuid)
@@ -98,7 +100,8 @@ class send:
         email_html = body.format.html_email.get_request()
         
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
-    
+
+    @staticmethod
     def invite(uuid:str, BCC=True):
         
         event_dict = edb.unserialize_event(uuid)
