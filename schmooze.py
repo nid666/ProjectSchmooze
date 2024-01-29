@@ -128,7 +128,7 @@ def mainPage():
             #location_images = ["placeholder_link.com" for _ in range(len(st.session_state.get(locations)))]
             #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
             
-            event = edb.generate_EVENT_DICT()
+            event = {}
             event['uuid'] = uuid
             event['date'] = selected_date
             event['times'] = selected_time_slots
@@ -263,6 +263,7 @@ def renderVotingPage():
             # Convert the dictionary to a JSON object
             vote_json = json.dumps(vote_result)
 
+            
 
             
             # You can display the JSON, write it to a file, or send it somewhere
