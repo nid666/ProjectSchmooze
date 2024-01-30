@@ -1,4 +1,5 @@
 import datetime
+import time
 import streamlit as st
 import re
 import schmail as notify
@@ -198,6 +199,10 @@ def renderVotingPage():
 
     #checking if the cookies exist
     cookies = cookie_manager.get("results")
+    with st.spinner("Loading Page..."):
+        time.sleep(1)
+
+    # If the cookies do not exist, create temp cookies
     if cookies == None:
         vote_result = {
                 "votedStatus": False,
@@ -206,31 +211,28 @@ def renderVotingPage():
                 "selected_time": None
             }
         cookie_manager.set("results", vote_result)
-    cookies = cookie_manager.get_all()
-
-    results = cookies['results']
-
+    
+    st.write(cookies)
     # CHANGE THE COOKIES
-
-    cookie_manager.set('results', results)
-
-
+    
+    
     #Checking to see if they voted to render the correct page
-    if results['votedStatus'] == True:
+    if cookies['votedStatus'] == True:
         renderRevotePage()
         
     else:
-        st.write(cookies)
-        # Initialize session state variables
+        # Initialize session state variables for location
         if 'selected_location' not in st.session_state:
             st.session_state['selected_location'] = None
-
+        # Initialize session state variables for time
         if 'selected_time' not in st.session_state:
             st.session_state['selected_time'] = None
+
 
         locations = event_dict["locations"]
         loc_cols = st.columns(len(locations))
 
+        #Generates the buttons for locations, with c being the columns and l being the location
         for c, l in zip(loc_cols, locations):
             with c:
                 st.header(l)
@@ -245,6 +247,7 @@ def renderVotingPage():
         times = event_dict["times"]
         tim_cols = st.columns(len(times))
 
+        # Generates the buttons for times, with t being the columns and l being the time
         for t, l in zip(tim_cols, times):
             with t:
                 st.header(l)
@@ -254,6 +257,7 @@ def renderVotingPage():
 
         st.divider()
 
+        # Renders the final voting button to cast the final vote
         if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
             # Capture the votes and uuid in a dictionary
             vote_result = {
@@ -262,7 +266,12 @@ def renderVotingPage():
                 "selected_location": st.session_state['selected_location'],
                 "selected_time": st.session_state['selected_time']
             }
+            #sets the cookie to the new value
             cookie_manager.set("results", vote_result)
+
+
+
+
             # Convert the dictionary to a JSON object
             vote_json = json.dumps(vote_result)
 
@@ -271,7 +280,6 @@ def renderVotingPage():
             
             # You can display the JSON, write it to a file, or send it somewhere
             st.json(vote_json)
-
 
         
 
