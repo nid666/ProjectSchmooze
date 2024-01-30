@@ -23,16 +23,17 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Setup database system to keep track of a uuid's voting status/results
 
 ## Phase 2 ToDo:
-- [ ] login page for the user
+- [ ] login page for the user (Sid)
 - [ ] check if a restaunt is avaliable at a given time
 - [ ] Notify user if all clients have voted to finalize the reservation (Dean)
 - [ ] Notify clients of confirmed reservation (Dean)
-- [ ] Host it publically for demos
+- [ ] Host it publically for demos (Sid)
 - [ ] Do calendar invites in email (Dean)
 - [ ] Setup api to allow automatic booking once a vote is finalized
-- [ ] Show final result
+- [ ] Show final result (Sid)
 - [ ] Fix any bugs in email system (Dean)
 - [ ] Fix any bugs in voting page
+- [ ] Allow for multi email selection (Sid)
 
 
 ## Phase 3 ToDo
