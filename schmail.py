@@ -105,7 +105,7 @@ class send:
     def invite(uuid:str, BCC=True):
         
         event_dict = edb.unserialize_event(uuid)
-        subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict["date"]}!"
+        subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict['date']}!"
         email_raw = body.format.raw_email.get_invite()
         email_html = body.format.html_email.get_invite()
         

@@ -187,8 +187,11 @@ def renderRevotePage():
 
 def renderVotingPage():
     uuid = st.query_params.get("uuid")
-    event_dict = edb.event.details.unserialize(uuid)
 
+    event_dict = edb.event.details.unserialize(uuid)
+    if event_dict == None:
+        st.error("Invalid UUID")
+        return
     st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 
     st.subheader("Cast Your Vote")
