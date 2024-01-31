@@ -33,7 +33,7 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Show final result (Sid)
 - [ ] Fix any bugs in email system (Dean)
 - [ ] Fix any bugs in voting page
-- [ ] Allow for multi email selection (Sid)
+- [x] Allow for multi email selection (Sid)
 
 
 ## Phase 3 ToDo
