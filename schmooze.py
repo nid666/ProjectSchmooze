@@ -7,7 +7,7 @@ import json
 from streamlit_extras.stateful_button import button 
 import extra_streamlit_components as stx
 import events_database as edb
-
+import streamlit_authenticator as stauth
 
 # Ignore this, it is just page setup boilerplate
 st.set_page_config(
@@ -71,10 +71,13 @@ def mainPage():
     if 'locations' not in st.session_state:
         st.session_state['locations'] = [0, 0 ,0]
 
+    if 'emails' not in st.session_state:
+        st.session_state['emails'] = []
 
+    # Initialize an empty string to store the current email input
+    if 'current_email' not in st.session_state:
+        st.session_state.current_email = ""
 
-
-    #TODO - Add option to select more than one location
 
     st.subheader("Enter the locations you would like to reserve")
     firstLocation = st.text_input(label="firstLocation", placeholder="Input your first location here", key="firstLocation", label_visibility="hidden")
@@ -104,10 +107,27 @@ def mainPage():
 
     st.subheader("Enter a budget per person")
     budget = st.number_input(label="Enter the budget per person", label_visibility="hidden")
-    st.subheader("Enter the email address of the primary person you would like to invite")
-    email = st.text_input(label = "email", placeholder="Input your email here", label_visibility="hidden")
-    # CHANGE 'email' VARIABLE TO BE LIST
-    emails = [email] #TEMPORARY HANDLING OF MULTIPLE RECIPIENTS
+    st.subheader("Enter the email addresses of the people you would like to invite")
+
+    new_email = st.text_input('Enter email address', value=st.session_state.current_email, key='email_input')
+
+    if st.button('Add Email'):
+        if is_valid_email(new_email):
+            if new_email in st.session_state.emails:
+                st.toast('Email already added')
+            else:
+                # Add the new email to the list of emails
+                st.session_state.emails.append(new_email)
+                # Clear the current email input
+                st.session_state.current_email = ""
+                st.toast("Email Added!")
+        else:
+            st.error('Please enter a valid email address.')
+
+    # Update the current email input in the state
+    st.session_state.current_email = new_email
+
+    st.multiselect('Edit Emails',options=st.session_state.emails, default = st.session_state.emails, key='emails') 
     st.divider()
 
 
@@ -121,8 +141,8 @@ def mainPage():
         
         if (len(selected_time_slots) == 0):
             st.error("You must select at least one time slot")
-        elif is_valid_email(email) == False:
-            st.error("You must enter a valid email address")
+        #elif is_valid_email(email) == False:
+            #st.error("You must enter a valid email address")
         else:
             uuid = edb.generate_UUID()
 
@@ -136,7 +156,7 @@ def mainPage():
             event['locations'] = st.session_state['locations']
             event['budget'] = budget
             event['sender'] = "TEMPORARY_VALUE" # needs organizer's email address
-            event['recipients'] = emails
+            event['recipients'] = st.session_state['emails']
 
             edb.event.details.serialize(event)
             
