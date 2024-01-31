@@ -155,33 +155,41 @@ cookie_manager = get_manager()
 
 def renderRevotePage():
     # Check for existing cookies
-    has_voted = cookie_manager.get("voted")
+    cookies = cookie_manager.get("results")
 
+    uuid = st.query_params.get("uuid")
+    event_dict = edb.event.details.unserialize(uuid)
+    if event_dict == None:
+        st.error("Invalid UUID")
+        return
+    
+    # getting the time and location values
+    locations = event_dict["locations"]
+    times = event_dict["times"]
 
+    # # Location Voting
+    # loc_cols = st.columns(len(locations))
+    # for c, l in zip(loc_cols, locations):
+    #     with c:
+    #         st.header(l)
+    #         if current_location == l:
+    #             st.write("Previously Selected")
+    #             location_selected = True
+    #         elif st.button(label="Vote for " + l, key=f"vote_{l}"):
+    #             location_selected = True
+    #             cookie_manager.set("current_location", l)
 
-    # Location Voting
-    loc_cols = st.columns(len(locations))
-    for c, l in zip(loc_cols, locations):
-        with c:
-            st.header(l)
-            if current_location == l:
-                st.write("Previously Selected")
-                location_selected = True
-            elif st.button(label="Vote for " + l, key=f"vote_{l}"):
-                location_selected = True
-                cookie_manager.set("current_location", l)
-
-    # Time Selection
-    tim_cols = st.columns(len(times))
-    for t, time in zip(tim_cols, times):
-        with t:
-            st.header(time)
-            if current_time == time:
-                st.write("Previously Selected")
-                time_selected = True
-            elif st.button(label="Select time " + time, key=f"select_{time}"):
-                time_selected = True
-                cookie_manager.set("current_time", time)
+    # # Time Selection
+    # tim_cols = st.columns(len(times))
+    # for t, time in zip(tim_cols, times):
+    #     with t:
+    #         st.header(time)
+    #         if current_time == time:
+    #             st.write("Previously Selected")
+    #             time_selected = True
+    #         elif st.button(label="Select time " + time, key=f"select_{time}"):
+    #             time_selected = True
+    #             cookie_manager.set("current_time", time)
 
                 
     st.write('voted')
@@ -193,6 +201,8 @@ def renderVotingPage():
     if event_dict == None:
         st.error("Invalid UUID")
         return
+    
+
     st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 
     st.subheader("Cast Your Vote")
