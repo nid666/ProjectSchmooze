@@ -167,31 +167,42 @@ def renderRevotePage():
     locations = event_dict["locations"]
     times = event_dict["times"]
 
-    # # Location Voting
-    # loc_cols = st.columns(len(locations))
-    # for c, l in zip(loc_cols, locations):
-    #     with c:
-    #         st.header(l)
-    #         if current_location == l:
-    #             st.write("Previously Selected")
-    #             location_selected = True
-    #         elif st.button(label="Vote for " + l, key=f"vote_{l}"):
-    #             location_selected = True
-    #             cookie_manager.set("current_location", l)
+    st.subheader("Change your vote: ")
+    # Location Voting
+    loc_cols = st.columns(len(locations))
+    for c, l in zip(loc_cols, locations):
+            with c:
+                st.header(l)
+                if st.button(label = "Select location " + l, key=f"vote_{l}"):
+                    st.session_state['selected_location'] = l
+                    st.write(f"Location {l} Selected")
+    # Time Selection
+    tim_cols = st.columns(len(times))
 
-    # # Time Selection
-    # tim_cols = st.columns(len(times))
-    # for t, time in zip(tim_cols, times):
-    #     with t:
-    #         st.header(time)
-    #         if current_time == time:
-    #             st.write("Previously Selected")
-    #             time_selected = True
-    #         elif st.button(label="Select time " + time, key=f"select_{time}"):
-    #             time_selected = True
-    #             cookie_manager.set("current_time", time)
-
+    for t, l in zip(tim_cols, times):
+            with t:
+                st.header(l)
+                if st.button(label= "Select", key=f"select_{l}"):
+                    st.session_state['selected_time'] = l
+                    st.write(f"Time {l} Selected")
                 
+    
+
+    if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
+            
+            if cookies['selected_location'] == st.session_state['selected_location'] and cookies['selected_time'] == st.session_state['selected_time']:
+                st.error("You have already voted for this location and time")
+                return
+            # Capture the votes and uuid in a dictionary
+            else:
+                vote_result = {
+                    "votedStatus": True,
+                    "uuid": uuid,
+                    "selected_location": st.session_state['selected_location'],
+                    "selected_time": st.session_state['selected_time']
+                }
+                cookie_manager.set("results", vote_result)
+
     st.write('voted')
 
 def renderVotingPage():
@@ -205,7 +216,7 @@ def renderVotingPage():
 
     st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 
-    st.subheader("Cast Your Vote")
+    
 
     #checking if the cookies exist
     cookies = cookie_manager.get("results")
@@ -221,6 +232,9 @@ def renderVotingPage():
                 "selected_time": None
             }
         cookie_manager.set("results", vote_result)
+
+
+    
     
     st.write(cookies)
     # CHANGE THE COOKIES
@@ -231,6 +245,8 @@ def renderVotingPage():
         renderRevotePage()
         
     else:
+
+        st.subheader("Cast Your Vote")
         # Initialize session state variables for location
         if 'selected_location' not in st.session_state:
             st.session_state['selected_location'] = None
