@@ -17,12 +17,17 @@ class event:
     class voting:
 
         @staticmethod
+        def vote(uuid:str, vote_dict:dict)->bool:
+            event_dict = details.unserialize(uuid)
+            event_dict["votes"][vote_dict["voting_id"]] = vote_dict
+            details.serialize(event_dict)
+
+        @staticmethod
         def get_current_winner() -> None:
             # time > location
             # how to handle conflicts within recipient times, and between recipient times and location availablility (booked, closed, ...)
             # recipients speciy times?
             return
-
 
         # boolean function used to indicate approval email
         @staticmethod

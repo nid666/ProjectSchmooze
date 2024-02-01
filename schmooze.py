@@ -157,6 +157,7 @@ def mainPage():
             event['budget'] = budget
             event['sender'] = "TEMPORARY_VALUE" # needs organizer's email address
             event['recipients'] = st.session_state['emails']
+            event['votes'] = {}
 
             edb.event.details.serialize(event)
             
@@ -218,14 +219,18 @@ def renderRevotePage():
                 vote_result = {
                     "votedStatus": True,
                     "uuid": uuid,
+                    "voting_id": st.query_params.get("voting_id"),
                     "selected_location": st.session_state['selected_location'],
                     "selected_time": st.session_state['selected_time']
                 }
                 cookie_manager.set("results", vote_result)
 
+                edb.event.voting.vote(uuid, vote_result)
+
     st.write('voted')
 
 def renderVotingPage():
+    
     uuid = st.query_params.get("uuid")
 
     event_dict = edb.event.details.unserialize(uuid)
@@ -243,18 +248,18 @@ def renderVotingPage():
     with st.spinner("Loading Page..."):
         time.sleep(1)
 
+    voting_UUID = edb.generate_UUID()
+
     # If the cookies do not exist, create temp cookies
     if cookies == None:
         vote_result = {
                 "votedStatus": False,
+                "voting_id": voting_UUID
                 "uuid": uuid,
                 "selected_location": None,
                 "selected_time": None
             }
         cookie_manager.set("results", vote_result)
-
-
-    
     
     st.write(cookies)
     # CHANGE THE COOKIES
@@ -308,6 +313,7 @@ def renderVotingPage():
             # Capture the votes and uuid in a dictionary
             vote_result = {
                 "votedStatus": True,
+                "voting_id": voting_UUID
                 "uuid": uuid,
                 "selected_location": st.session_state['selected_location'],
                 "selected_time": st.session_state['selected_time']
@@ -326,6 +332,9 @@ def renderVotingPage():
             
             # You can display the JSON, write it to a file, or send it somewhere
             st.json(vote_json)
+
+            # DATABASE: saved to pickle
+            edb.event.voting.vote(uuid, vote_result)
 
         
 
