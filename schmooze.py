@@ -254,7 +254,7 @@ def renderVotingPage():
     if cookies == None:
         vote_result = {
                 "votedStatus": False,
-                "voting_id": voting_UUID
+                "voting_id": voting_UUID,
                 "uuid": uuid,
                 "selected_location": None,
                 "selected_time": None
@@ -313,7 +313,7 @@ def renderVotingPage():
             # Capture the votes and uuid in a dictionary
             vote_result = {
                 "votedStatus": True,
-                "voting_id": voting_UUID
+                "voting_id": voting_UUID,
                 "uuid": uuid,
                 "selected_location": st.session_state['selected_location'],
                 "selected_time": st.session_state['selected_time']
