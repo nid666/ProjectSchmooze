@@ -121,8 +121,8 @@ class send:
         
         event_dict = edb.unserialize_event(uuid)
         subject = f"[{TAG_COMPANY_NAME}] Your event on {event_dict['date']} needs approval!"
-        email_raw = body.format.raw_email.get_request(event_dict)
-        email_html = body.format.html_email.get_request(event_dict)
+        email_raw = body.format.raw_email.get_request(event_dict, request_link)
+        email_html = body.format.html_email.get_request(event_dict, request_link)
         email_attachments = body.format.attachments.get_request(event_dict)
         
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
@@ -132,11 +132,12 @@ class send:
         
         event_dict = edb.unserialize_event(uuid)
         subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict['date']}!"
-        email_raw = body.format.raw_email.get_invite(event_dict)
-        email_html = body.format.html_email.get_invite(event_dict)
+        email_raw = body.format.raw_email.get_invite(event_dict, voting_link)
+        email_html = body.format.html_email.get_invite(event_dict, voting_link)
         email_attachments = body.format.attachments.get_invite(event_dict)
         
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
+
 
 
 
