@@ -91,8 +91,6 @@ class wrapper:
         
         return hours_difference
 
-    
-
 class format:
     
     class raw_email:
@@ -115,11 +113,10 @@ class format:
             row1 = f"{organizer}'s event on {winning_time} ({date}) at {winning_location} has been booked!"
             row2 = f"Add this event to your calendar:"
             
-            
-            return 
+            return row1 + '\n\n' + row2
 
         @staticmethod
-        def get_request(event_dict: dict)->str:
+        def get_request(event_dict: dict, request_link:str)->str:
 
             uuid = event['uuid']
             date = event['date']
@@ -132,11 +129,17 @@ class format:
 
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
+
+            row1 = f"Your event on {winning_time} ({date}) at {winning_location} needs approval!"
+            row2 = f"Approve: {request_link}"
+            row3 = "RESULTS:"
+            row4 = "Times - " + ', '.join(f"{t} ({score})" for t, score in wrapper.get_scores_time().items())
+            row5 = "Locations - " + ', '.join(f"{l} ({score})" for l, score in wrapper.get_scores_location().items())
             
-            return ""
+            return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n' + row5
 
         @staticmethod
-        def get_invite(event_dict: dict)->str:
+        def get_invite(event_dict: dict, voting_link:str)->str:
 
             uuid = event['uuid']
             date = event['date']
@@ -147,63 +150,89 @@ class format:
             guests = event['recipients']
             votes = event['votes']
 
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
+            row1 = f"{organizer} is inviting you to an event on {date}!"
+            row2 = f"Vote: {voting_link}"
+            row3 = "Times - " + ', '.join(f"{t}" for t in wrapper.get_scores_time().keys())
+            row4 = "Locations - " + ', '.join(f"{l}" for l in wrapper.get_scores_location().keys())
             
-            return ""
+            return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n' + row4
         
     class html_email:
 
         @staticmethod
-        def get_approve(event_dict: dict)->str:
+        def get_approve(event_dict: dict) -> str:
+            organizer = event_dict['sender']
+            winning_time = wrapper.get_winning_time(event_dict['votes'])
+            date = event_dict['date']
+            winning_location = wrapper.get_winning_location(event_dict['votes'])
 
-            uuid = event['uuid']
-            date = event['date']
-            times = event['times']
-            locations = event['locations']
-            budget = event['budget']
-            organizer = event['sender']
-            guests = event['recipients']
-            votes = event['votes']
-
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
-            
-            return ""
-
-        @staticmethod
-        def get_request(event_dict: dict)->str:
-
-            uuid = event['uuid']
-            date = event['date']
-            times = event['times']
-            locations = event['locations']
-            budget = event['budget']
-            organizer = event['sender']
-            guests = event['recipients']
-            votes = event['votes']
-
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
-            
-            return ""
+            html_content = f"""
+            <html>
+                <head></head>
+                <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
+                    <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h2 style="color: #4CAF50; text-align: center;">Event Approved</h2>
+                        <p style="font-size: 16px; color: #555;">
+                            {organizer}'s event on <strong>{winning_time} ({date})</strong> at <strong>{winning_location}</strong> has been booked!
+                        </p>
+                        <p style="text-align: center; margin-top: 25px;">
+                            <a href="#" style="background-color: #4CAF50; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Add to Calendar</a>
+                        </p>
+                    </div>
+                </body>
+            </html>
+            """
+            return html_content
 
         @staticmethod
-        def get_invite(event_dict: dict)->str:
+        def get_request(event_dict: dict, request_link: str) -> str:
+            organizer = event_dict['sender']
+            winning_time = wrapper.get_winning_time(event_dict['votes'])
+            date = event_dict['date']
+            winning_location = wrapper.get_winning_location(event_dict['votes'])
 
-            uuid = event['uuid']
-            date = event['date']
-            times = event['times']
-            locations = event['locations']
-            budget = event['budget']
-            organizer = event['sender']
-            guests = event['recipients']
-            votes = event['votes']
+            html_content = f"""
+            <html>
+                <head></head>
+                <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
+                    <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h2 style="color: #007bff; text-align: center;">Approval Needed</h2>
+                        <p style="font-size: 16px; color: #555;">Your event on <strong>{winning_time} ({date})</strong> at <strong>{winning_location}</strong> needs approval!</p>
+                        <p style="text-align: center; margin-top: 25px;">
+                            <a href="{request_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Approve Event</a>
+                        </p>
+                        <h3 style="color: #333;">RESULTS:</h3>
+                        <p style="font-size: 14px; color: #555;">Times - {', '.join(f"{t} ({score})" for t, score in wrapper.get_scores_time(event_dict['votes']).items())}</p>
+                        <p style="font-size: 14px; color: #555;">Locations - {', '.join(f"{l} ({score})" for l, score in wrapper.get_scores_location(event_dict['votes']).items())}</p>
+                    </div>
+                </body>
+            </html>
+            """
+            return html_content
 
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
-            
-            return ""
+        @staticmethod
+        def get_invite(event_dict: dict, voting_link: str) -> str:
+            organizer = event_dict['sender']
+            date = event_dict['date']
+
+            html_content = f"""
+            <html>
+                <head></head>
+                <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
+                    <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h2 style="color: #ff9800; text-align: center;">You're Invited!</h2>
+                        <p style="font-size: 16px; color: #555;">{organizer} is inviting you to an event on <strong>{date}</strong>!</p>
+                        <p style="text-align: center; margin-top: 25px;">
+                            <a href="{voting_link}" style="background-color: #ff9800; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Vote Now</a>
+                        </p>
+                        <h3 style="color: #333;">Options:</h3>
+                        <p style="font-size: 14px; color: #555;">Times - {', '.join(f"{t}" for t in wrapper.get_scores_time(event_dict['votes']).keys())}</p>
+                        <p style="font-size: 14px; color: #555;">Locations - {', '.join(f"{l}" for l in wrapper.get_scores_location(event_dict['votes']).keys())}</p>
+                    </div>
+                </body>
+            </html>
+            """
+            return html_content
 
     class attachments:
 
@@ -221,39 +250,19 @@ class format:
 
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
-            
-            return ""
+
+            ret = []
+
+            ret.append(PATH_FILE_CAL_EVENT(f"{organizer}--{date}({winning_time})", winning_location, "{winning_location} @ {date} ({winning_time}) with {organizer}!", date, winning_time))
+        
+            return ret
 
         @staticmethod
-        def get_request(event_dict: dict)->str:
-
-            uuid = event['uuid']
-            date = event['date']
-            times = event['times']
-            locations = event['locations']
-            budget = event['budget']
-            organizer = event['sender']
-            guests = event['recipients']
-            votes = event['votes']
-
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
+        def get_request(event_dict: dict)->list:
             
-            return ""
+            return []
 
         @staticmethod
-        def get_invite(event_dict: dict)->str:
-
-            uuid = event['uuid']
-            date = event['date']
-            times = event['times']
-            locations = event['locations']
-            budget = event['budget']
-            organizer = event['sender']
-            guests = event['recipients']
-            votes = event['votes']
-
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
+        def get_invite(event_dict: dict)->list:
             
-            return ""
+            return []

@@ -3,6 +3,7 @@ import smtplib
 import json
 import email_bodys as body
 import events_database as edb
+import os
 
 PATH_CREDENTIALS_FILE = "secret/creds.json"
 TAG_COMPANY_NAME = "SCHMOOZE"
@@ -45,13 +46,14 @@ def GET_CREDENTIALS():
 
         return (email, password)
     
-def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", attachments, recipients=[]) -> bool:
-
+def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", attachments=[], recipients=[]):
+    
     creds = GET_CREDENTIALS()
     ADDRESS = creds[0]
     PASSWORD = creds[1]
-    
-    if ADDRESS == "" or PASSWORD == "" or email_raw == "" or recipients == None: return False
+
+    if ADDRESS == "" or PASSWORD == "" or email_raw == "" or not recipients:
+        return False
 
     x = 'Bcc'
     y = 'To'
@@ -65,9 +67,25 @@ def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", attachments, r
     msg[x] = ADDRESS
     msg[y] = ', '.join(recipients)
     msg.set_content(email_raw)
-    
+
     if email_html != "":
         msg.add_alternative(email_html, subtype='html')
+
+    # Add attachments
+    for file_path in attachments:
+        # Guess the content type based on the file's extension
+        mime_type, _ = mimetypes.guess_type(file_path)
+        if mime_type is None:
+            # If the type cannot be guessed, use a generic binary type
+            mime_type = 'application/octet-stream'
+
+        mime_type, mime_subtype = mime_type.split('/', 1)
+
+        with open(file_path, 'rb') as file:
+            msg.add_attachment(file.read(),
+                               maintype=mime_type,
+                               subtype=mime_subtype,
+                               filename=basename(file_path))
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
@@ -76,6 +94,12 @@ def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", attachments, r
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
+
+    # local versions of attachments deleted only when email(s) are successfully sent
+    # NOTE: don't call sequentially. Multiple recipients -> list argument
+    for filepath in attachments:
+        if os.path.exists(filepath):
+            os.remove(filepath)
 
     return True
 
@@ -88,28 +112,31 @@ class send:
         subject = f"[{TAG_COMPANY_NAME}] Add your event on {event_dict['date']} to your calendar!"
         email_raw = body.format.raw_email.get_approve(event_dict)
         email_html = body.format.html_email.get_approve(event_dict)
+        email_attachments = body.format.attachments.get_approve(event_dict)
 
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
 
     @staticmethod
-    def request(uuid:str, BCC=True):
+    def request(uuid:str, request_link:str, BCC=True):
         
         event_dict = edb.unserialize_event(uuid)
         subject = f"[{TAG_COMPANY_NAME}] Your event on {event_dict['date']} needs approval!"
         email_raw = body.format.raw_email.get_request(event_dict)
         email_html = body.format.html_email.get_request(event_dict)
+        email_attachments = body.format.attachments.get_request(event_dict)
         
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
 
     @staticmethod
-    def invite(uuid:str, BCC=True):
+    def invite(uuid:str, voting_link:str, BCC=True):
         
         event_dict = edb.unserialize_event(uuid)
         subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict['date']}!"
         email_raw = body.format.raw_email.get_invite(event_dict)
         email_html = body.format.html_email.get_invite(event_dict)
+        email_attachments = body.format.attachments.get_invite(event_dict)
         
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
 
 
 
