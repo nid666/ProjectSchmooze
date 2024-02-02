@@ -9,6 +9,8 @@ import extra_streamlit_components as stx
 import events_database as edb
 import streamlit_authenticator as stauth
 import yaml
+#Sign in system:import yaml
+from yaml.loader import SafeLoader
 
 # Ignore this, it is just page setup boilerplate
 st.set_page_config(
@@ -32,21 +34,7 @@ hide_streamlit_style = """
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
-#Sign in system:import yaml
-from yaml.loader import SafeLoader
 
-with open('config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
-
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config['preauthorized']
-)
-
-authenticator.login()
 
 
 
@@ -366,7 +354,22 @@ def renderVotingPage():
             # DATABASE: saved to pickle
             edb.event.voting.vote(uuid, vote_result)
 
-        
+@st.cache_data
+def getLoginConfig():
+    with open('config.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
+    return config
+
+config = getLoginConfig()
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+authenticator.login()
 
 def main():
     if st.query_params.get("uuid") == None:
