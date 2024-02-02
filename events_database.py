@@ -19,11 +19,13 @@ class event:
 
         @staticmethod
         def vote(uuid:str, vote_dict:dict)->bool:
-            event_dict = details.unserialize(uuid)
+            event_dict = event.details.unserialize(uuid)
             event_dict["votes"][vote_dict["voting_id"]] = vote_dict
-            details.serialize(event_dict)
+            event.details.serialize(event_dict)
 
-            all_voted = (len(event_dict["recipients"])) >= (len(event_dict["votes"]))
+            majority_index = (len(event_dict["recipients"]) / 2) + 1
+
+            all_voted = (len(event_dict["votes"])) >= majority_index
             if(all_voted): notify.send.request(uuid, "google.com", True) # temporary WEBSITE placeholder for approval page
 
         @staticmethod

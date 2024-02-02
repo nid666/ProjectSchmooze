@@ -166,7 +166,7 @@ def mainPage():
 
             st.toast("Invite sent successfully!")
 
-            #notify.send_email(SENDER=email, DATE=selected_date, RECIPIENTS=emails, BCC=False, locations=locations_dict, times=selected_time_slots)
+            notify.send.invite(uuid, "google.com", True) # temporary placeholder link for the voting page
             
 #might need to include st.cache_data() here if there are performance issues
 def get_manager():
@@ -210,16 +210,26 @@ def renderRevotePage():
     
 
     if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
+
+            # Initialize session state variables for location
+            if 'selected_location' not in st.session_state:
+                st.session_state['selected_location'] = None
+            # Initialize session state variables for time
+            if 'selected_time' not in st.session_state:
+                st.session_state['selected_time'] = None
             
             if cookies['selected_location'] == st.session_state['selected_location'] and cookies['selected_time'] == st.session_state['selected_time']:
                 st.error("You have already voted for this location and time")
                 return
             # Capture the votes and uuid in a dictionary
             else:
+
+                voting_id = cookie_manager.get("results")['voting_id']
+
                 vote_result = {
                     "votedStatus": True,
                     "uuid": uuid,
-                    "voting_id": st.query_params.get("voting_id"),
+                    "voting_id": voting_id,
                     "selected_location": st.session_state['selected_location'],
                     "selected_time": st.session_state['selected_time']
                 }
@@ -241,20 +251,18 @@ def renderVotingPage():
 
     st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 
-    
-
     #checking if the cookies exist
     cookies = cookie_manager.get("results")
     with st.spinner("Loading Page..."):
         time.sleep(1)
 
-    voting_UUID = edb.generate_UUID()
+    voting_id = edb.generate_UUID()
 
     # If the cookies do not exist, create temp cookies
     if cookies == None:
         vote_result = {
                 "votedStatus": False,
-                "voting_id": voting_UUID,
+                "voting_id": voting_id,
                 "uuid": uuid,
                 "selected_location": None,
                 "selected_time": None
@@ -310,10 +318,16 @@ def renderVotingPage():
 
         # Renders the final voting button to cast the final vote
         if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
+
+            #results_cookie = cookie_manager.get("results")
+            #results_dict = json.loads(results_cookie)
+            #voting_id = results_dict['voting_id']
+            #voting_id = results_cookie['voting_id']
+
             # Capture the votes and uuid in a dictionary
             vote_result = {
                 "votedStatus": True,
-                "voting_id": voting_UUID,
+                "voting_id": voting_id,
                 "uuid": uuid,
                 "selected_location": st.session_state['selected_location'],
                 "selected_time": st.session_state['selected_time']
@@ -326,8 +340,6 @@ def renderVotingPage():
 
             # Convert the dictionary to a JSON object
             vote_json = json.dumps(vote_result)
-
-            
 
             
             # You can display the JSON, write it to a file, or send it somewhere
