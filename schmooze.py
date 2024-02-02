@@ -257,7 +257,7 @@ def renderVotingPage():
         time.sleep(1)
 
     voting_id = edb.generate_UUID()
-
+    st.write(voting_id)
     # If the cookies do not exist, create temp cookies
     if cookies == None:
         vote_result = {
@@ -272,7 +272,9 @@ def renderVotingPage():
     st.write(cookies)
     # CHANGE THE COOKIES
     
-    
+    if cookies == None:
+        with st.spinner("Loading Data..."):
+            time.sleep(1)
     #Checking to see if they voted to render the correct page
     if cookies['votedStatus'] == True:
         renderRevotePage()
