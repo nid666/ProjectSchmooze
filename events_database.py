@@ -1,6 +1,7 @@
 import uuid
 import pickle
 import os
+import schmail as notify
 
 PATH_DIR_ALL_EVENTS = "events"
 
@@ -21,6 +22,9 @@ class event:
             event_dict = details.unserialize(uuid)
             event_dict["votes"][vote_dict["voting_id"]] = vote_dict
             details.serialize(event_dict)
+
+            all_voted = (len(event_dict["recipients"])) >= (len(event_dict["votes"]))
+            if(all_voted): notify.send.request(uuid, "google.com", True) # temporary WEBSITE placeholder for approval page
 
         @staticmethod
         def get_current_winner() -> None:

@@ -16,7 +16,8 @@ def PATH_FILE_CAL_EVENT(name:str, location:str, desc:str, date:str, time_range:s
     event.location = location
     event.description = desc
     event.duration = timedelta(hours=wrapper.length_hours(time_range))
-    event.begin = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+    print("date string :: " + f"{date}{wrapper.convert_time_to_24hr(start_time)}")
+    #event.begin = datetime.strptime(f"{date}{wrapper.convert_time_to_24hr(start_time)}", "%Y-%m-%d %H:%M")
 
     cal.events.add(event)
 
@@ -32,7 +33,7 @@ class wrapper:
         ret_dict = {}
         for v in votes_dict.values():
             element = v["selected_location"]
-            if element in ret_dict.keys():
+            if element not in ret_dict.keys():
                 ret_dict[element] = 1
                 continue
             ret_dict[element] += 1
@@ -49,7 +50,7 @@ class wrapper:
         ret_dict = {}
         for v in votes_dict.values():
             element = v["selected_time"]
-            if element in ret_dict.keys():
+            if element not in ret_dict.keys():
                 ret_dict[element] = 1
                 continue
             ret_dict[element] += 1
@@ -96,7 +97,7 @@ class format:
     class raw_email:
 
         @staticmethod
-        def get_approve(event_dict: dict)->str:
+        def get_approve(event: dict)->str:
 
             uuid = event['uuid']
             date = event['date']
@@ -116,7 +117,7 @@ class format:
             return row1 + '\n\n' + row2
 
         @staticmethod
-        def get_request(event_dict: dict, request_link:str)->str:
+        def get_request(event: dict, request_link:str)->str:
 
             uuid = event['uuid']
             date = event['date']
@@ -133,13 +134,13 @@ class format:
             row1 = f"Your event on {winning_time} ({date}) at {winning_location} needs approval!"
             row2 = f"Approve: {request_link}"
             row3 = "RESULTS:"
-            row4 = "Times - " + ', '.join(f"{t} ({score})" for t, score in wrapper.get_scores_time().items())
-            row5 = "Locations - " + ', '.join(f"{l} ({score})" for l, score in wrapper.get_scores_location().items())
+            row4 = "Times - " + ', '.join(f"{t} ({score})" for t, score in wrapper.get_scores_time(event['votes']).items())
+            row5 = "Locations - " + ', '.join(f"{l} ({score})" for l, score in wrapper.get_scores_location(event['votes']).items())
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n' + row5
 
         @staticmethod
-        def get_invite(event_dict: dict, voting_link:str)->str:
+        def get_invite(event: dict, voting_link:str)->str:
 
             uuid = event['uuid']
             date = event['date']
@@ -152,8 +153,8 @@ class format:
 
             row1 = f"{organizer} is inviting you to an event on {date}!"
             row2 = f"Vote: {voting_link}"
-            row3 = "Times - " + ', '.join(f"{t}" for t in wrapper.get_scores_time().keys())
-            row4 = "Locations - " + ', '.join(f"{l}" for l in wrapper.get_scores_location().keys())
+            row3 = "Times - " + ', '.join(f"{t}" for t in wrapper.get_scores_time(event['votes']).keys())
+            row4 = "Locations - " + ', '.join(f"{l}" for l in wrapper.get_scores_location(event['votes']).keys())
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n' + row4
         
@@ -237,7 +238,7 @@ class format:
     class attachments:
 
         @staticmethod
-        def get_approve(event_dict: dict)->str:
+        def get_approve(event: dict)->str:
 
             uuid = event['uuid']
             date = event['date']
@@ -248,12 +249,19 @@ class format:
             guests = event['recipients']
             votes = event['votes']
 
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
+            winning_time_obj = wrapper.get_winning_time(votes)
+            winning_time_name = winning_time_obj[0]
+            winning_time_count = winning_time_obj[1]
+            #print(f"wtime: {winning_time}")
+            winning_loc_obj = wrapper.get_winning_location(votes)
+            winning_loc_name = winning_loc_obj[0]
+            winning_loc_count = winning_loc_obj[1]
+            #print(f"wloc: {winning_location}")
 
             ret = []
 
-            ret.append(PATH_FILE_CAL_EVENT(f"{organizer}--{date}({winning_time})", winning_location, "{winning_location} @ {date} ({winning_time}) with {organizer}!", date, winning_time))
+            # PATH_FILE_CAL_EVENT(name:str, location:str, desc:str, date:str, time_range:str)
+            ret.append(PATH_FILE_CAL_EVENT(f"{organizer}--{date}({winning_time_name})", winning_loc_name, "{winning_loc_name} @ {date} ({winning_time_name}) with {organizer}!", date, winning_time_name))
         
             return ret
 

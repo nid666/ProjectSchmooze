@@ -4,6 +4,7 @@ import json
 import email_bodys as body
 import events_database as edb
 import os
+import mimetypes
 
 PATH_CREDENTIALS_FILE = "secret/creds.json"
 TAG_COMPANY_NAME = "SCHMOOZE"
@@ -85,7 +86,7 @@ def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", attachments=[]
             msg.add_attachment(file.read(),
                                maintype=mime_type,
                                subtype=mime_subtype,
-                               filename=basename(file_path))
+                               filename=os.path.basename(file_path))
 
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
@@ -108,35 +109,35 @@ class send:
     @staticmethod
     def approve(uuid:str, BCC=True):
         
-        event_dict = edb.unserialize_event(uuid)
+        event_dict = edb.event.details.unserialize(uuid)
         subject = f"[{TAG_COMPANY_NAME}] Add your event on {event_dict['date']} to your calendar!"
         email_raw = body.format.raw_email.get_approve(event_dict)
         email_html = body.format.html_email.get_approve(event_dict)
         email_attachments = body.format.attachments.get_approve(event_dict)
 
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['recipients'])
 
     @staticmethod
     def request(uuid:str, request_link:str, BCC=True):
         
-        event_dict = edb.unserialize_event(uuid)
+        event_dict = edb.event.details.unserialize(uuid)
         subject = f"[{TAG_COMPANY_NAME}] Your event on {event_dict['date']} needs approval!"
         email_raw = body.format.raw_email.get_request(event_dict, request_link)
         email_html = body.format.html_email.get_request(event_dict, request_link)
         email_attachments = body.format.attachments.get_request(event_dict)
         
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['recipients'])
 
     @staticmethod
     def invite(uuid:str, voting_link:str, BCC=True):
         
-        event_dict = edb.unserialize_event(uuid)
+        event_dict = edb.event.details.unserialize(uuid)
         subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict['date']}!"
         email_raw = body.format.raw_email.get_invite(event_dict, voting_link)
         email_html = body.format.html_email.get_invite(event_dict, voting_link)
         email_attachments = body.format.attachments.get_invite(event_dict)
         
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['emails'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['recipients'])
 
 
 
