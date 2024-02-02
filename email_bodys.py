@@ -16,8 +16,8 @@ def PATH_FILE_CAL_EVENT(name:str, location:str, desc:str, date:str, time_range:s
     event.location = location
     event.description = desc
     event.duration = timedelta(hours=wrapper.length_hours(time_range))
-    print("date string :: " + f"{date}{wrapper.convert_time_to_24hr(start_time)}")
-    #event.begin = datetime.strptime(f"{date}{wrapper.convert_time_to_24hr(start_time)}", "%Y-%m-%d %H:%M")
+    #print("date string :: " + f"{date}{wrapper.convert_time_to_24hr(start_time)}")
+    event.begin = datetime.strptime(f"{date} {wrapper.convert_time_to_24hr(start_time)}", "%Y-%m-%d %H:%M")
 
     cal.events.add(event)
 

@@ -115,7 +115,10 @@ class send:
         email_html = body.format.html_email.get_approve(event_dict)
         email_attachments = body.format.attachments.get_approve(event_dict)
 
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['recipients'])
+        recipients = event_dict['recipients'].copy()
+        recipients.append(event_dict['sender'])
+
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
 
     @staticmethod
     def request(uuid:str, request_link:str, BCC=True):
@@ -125,8 +128,10 @@ class send:
         email_raw = body.format.raw_email.get_request(event_dict, request_link)
         email_html = body.format.html_email.get_request(event_dict, request_link)
         email_attachments = body.format.attachments.get_request(event_dict)
+
+        recipients = [event_dict['sender']]
         
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['recipients'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
 
     @staticmethod
     def invite(uuid:str, voting_link:str, BCC=True):
@@ -136,8 +141,10 @@ class send:
         email_raw = body.format.raw_email.get_invite(event_dict, voting_link)
         email_html = body.format.html_email.get_invite(event_dict, voting_link)
         email_attachments = body.format.attachments.get_invite(event_dict)
+
+        recipients = event_dict['recipients']
         
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=event_dict['recipients'])
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
 
 
 
