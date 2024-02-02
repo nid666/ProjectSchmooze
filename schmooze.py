@@ -8,6 +8,7 @@ from streamlit_extras.stateful_button import button
 import extra_streamlit_components as stx
 import events_database as edb
 import streamlit_authenticator as stauth
+import yaml
 
 # Ignore this, it is just page setup boilerplate
 st.set_page_config(
@@ -30,6 +31,24 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+#Sign in system:import yaml
+from yaml.loader import SafeLoader
+
+with open('config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+authenticator.login()
+
+
 
 #checks if the email given to it is valid or not, returns a boolean
 def is_valid_email(email):
@@ -169,10 +188,7 @@ def mainPage():
             notify.send.invite(uuid, "google.com", True) # temporary placeholder link for the voting page
             
 #might need to include st.cache_data() here if there are performance issues
-def get_manager():
-    return stx.CookieManager()
-
-cookie_manager = get_manager()
+cookie_manager = stx.CookieManager(key = "cookieManagerKey")
 
 def renderRevotePage():
     # Check for existing cookies
@@ -354,7 +370,19 @@ def renderVotingPage():
 
 def main():
     if st.query_params.get("uuid") == None:
-        mainPage()
+        
+        #Handles logging on
+        if st.session_state["authentication_status"]:
+            with st.spinner("Loading Page..."):
+                #This sleep is here to prevent widgets from rendering out of order due to rendering quicker than others
+                time.sleep(1)
+                authenticator.logout()
+                #If logged in successfully, render the main page
+                mainPage()
+        elif st.session_state["authentication_status"] is False:
+            st.error('Username/password is incorrect')
+        elif st.session_state["authentication_status"] is None:
+            st.warning('Please enter your username and password')
     else:
         renderVotingPage()
 main()
