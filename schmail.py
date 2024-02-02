@@ -5,7 +5,6 @@ import email_bodys as body
 import events_database as edb
 
 PATH_CREDENTIALS_FILE = "secret/creds.json"
-
 TAG_COMPANY_NAME = "SCHMOOZE"
 
 def GET_CREDENTIALS():
@@ -46,7 +45,7 @@ def GET_CREDENTIALS():
 
         return (email, password)
     
-def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", recipients=[]) -> bool:
+def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", attachments, recipients=[]) -> bool:
 
     creds = GET_CREDENTIALS()
     ADDRESS = creds[0]
@@ -66,6 +65,7 @@ def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", recipients=[])
     msg[x] = ADDRESS
     msg[y] = ', '.join(recipients)
     msg.set_content(email_raw)
+    
     if email_html != "":
         msg.add_alternative(email_html, subtype='html')
 
@@ -86,8 +86,8 @@ class send:
         
         event_dict = edb.unserialize_event(uuid)
         subject = f"[{TAG_COMPANY_NAME}] Add your event on {event_dict['date']} to your calendar!"
-        email_raw = body.format.raw_email.get_approve()
-        email_html = body.format.html_email.get_approve()
+        email_raw = body.format.raw_email.get_approve(event_dict)
+        email_html = body.format.html_email.get_approve(event_dict)
 
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
 
@@ -96,8 +96,8 @@ class send:
         
         event_dict = edb.unserialize_event(uuid)
         subject = f"[{TAG_COMPANY_NAME}] Your event on {event_dict['date']} needs approval!"
-        email_raw = body.format.raw_email.get_request()
-        email_html = body.format.html_email.get_request()
+        email_raw = body.format.raw_email.get_request(event_dict)
+        email_html = body.format.html_email.get_request(event_dict)
         
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
 
@@ -106,7 +106,10 @@ class send:
         
         event_dict = edb.unserialize_event(uuid)
         subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict['date']}!"
-        email_raw = body.format.raw_email.get_invite()
-        email_html = body.format.html_email.get_invite()
+        email_raw = body.format.raw_email.get_invite(event_dict)
+        email_html = body.format.html_email.get_invite(event_dict)
         
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, recipients=event_dict['emails'])
+
+
+
