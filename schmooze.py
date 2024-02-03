@@ -9,6 +9,8 @@ import extra_streamlit_components as stx
 import events_database as edb
 import streamlit_authenticator as stauth
 import yaml
+
+import cProfile
 #Sign in system:import yaml
 from yaml.loader import SafeLoader
 
@@ -379,7 +381,8 @@ def main():
             with st.spinner("Loading Page..."):
                 #This sleep is here to prevent widgets from rendering out of order due to rendering quicker than others
                 time.sleep(1)
-                authenticator.logout()
+                with st.sidebar:
+                    authenticator.logout()
                 #If logged in successfully, render the main page
                 mainPage()
         elif st.session_state["authentication_status"] is False:
@@ -388,4 +391,4 @@ def main():
             st.warning('Please enter your username and password')
     else:
         renderVotingPage()
-main()
+cProfile.run("main()")
