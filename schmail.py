@@ -7,7 +7,6 @@ import os
 import mimetypes
 
 PATH_CREDENTIALS_FILE = "secret/creds.json"
-TAG_COMPANY_NAME = "SCHMOOZE"
 
 def GET_CREDENTIALS():
 
@@ -110,7 +109,7 @@ class send:
     def approve(uuid:str, BCC=True):
         
         event_dict = edb.event.details.unserialize(uuid)
-        subject = f"[{TAG_COMPANY_NAME}] Add your event on {event_dict['date']} to your calendar!"
+        subject = body.format.subject.get_approve(event_dict)
         email_raw = body.format.raw_email.get_approve(event_dict)
         email_html = body.format.html_email.get_approve(event_dict)
         email_attachments = body.format.attachments.get_approve(event_dict)
@@ -124,7 +123,7 @@ class send:
     def request(uuid:str, request_link:str, BCC=True):
         
         event_dict = edb.event.details.unserialize(uuid)
-        subject = f"[{TAG_COMPANY_NAME}] Your event on {event_dict['date']} needs approval!"
+        subject = body.format.subject.get_request(event_dict)
         email_raw = body.format.raw_email.get_request(event_dict, request_link)
         email_html = body.format.html_email.get_request(event_dict, request_link)
         email_attachments = body.format.attachments.get_request(event_dict)
@@ -137,7 +136,7 @@ class send:
     def invite(uuid:str, voting_link:str, BCC=True):
         
         event_dict = edb.event.details.unserialize(uuid)
-        subject = f"[{TAG_COMPANY_NAME}] {event_dict['sender']} sent you an invitation on {event_dict['date']}!"
+        subject = body.format.subject.get_invite(event_dict)
         email_raw = body.format.raw_email.get_invite(event_dict, voting_link)
         email_html = body.format.html_email.get_invite(event_dict, voting_link)
         email_attachments = body.format.attachments.get_invite(event_dict)

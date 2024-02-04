@@ -3,6 +3,7 @@ from ics import Calendar, Event
 from datetime import datetime, timedelta
 
 PATH_DIR_MAIL = "mail"
+TAG_COMPANY_NAME = "SCHMOOZE"
 
 def PATH_FILE_CAL_EVENT(name:str, location:str, desc:str, date:str, time_range:str)->str:
     
@@ -93,6 +94,56 @@ class wrapper:
         return hours_difference
 
 class format:
+
+    class subject:
+
+        @staticmethod
+        def get_approve(event: dict)->str:
+            uuid = event['uuid']
+            date = event['date']
+            times = event['times']
+            locations = event['locations']
+            budget = event['budget']
+            organizer = event['sender']
+            guests = event['recipients']
+            votes = event['votes']
+
+            winning_time = wrapper.get_winning_time(votes)
+            winning_location = wrapper.get_winning_location(votes)
+
+            return f"[{TAG_COMPANY_NAME}] Add {wrapper.get_winning_location(votes)[0]} on {wrapper.get_winning_time(votes)[0]} to your calendar!"
+
+        @staticmethod
+        def get_request(event: dict)->str:
+            uuid = event['uuid']
+            date = event['date']
+            times = event['times']
+            locations = event['locations']
+            budget = event['budget']
+            organizer = event['sender']
+            guests = event['recipients']
+            votes = event['votes']
+
+            winning_time = wrapper.get_winning_time(votes)
+            winning_location = wrapper.get_winning_location(votes)
+
+            return f"[{TAG_COMPANY_NAME}] Your event on {date} needs approval!"
+
+        @staticmethod
+        def get_invite(event: dict)->str:
+            uuid = event['uuid']
+            date = event['date']
+            times = event['times']
+            locations = event['locations']
+            budget = event['budget']
+            organizer = event['sender']
+            guests = event['recipients']
+            votes = event['votes']
+
+            winning_time = wrapper.get_winning_time(votes)
+            winning_location = wrapper.get_winning_location(votes)
+
+            return f"[{TAG_COMPANY_NAME}] {organizer} sent an invitation on {date}!"
     
     class raw_email:
 
@@ -153,10 +204,12 @@ class format:
 
             row1 = f"{organizer} is inviting you to an event on {date}!"
             row2 = f"Vote: {voting_link}"
-            row3 = "Times - " + ', '.join(f"{t}" for t in wrapper.get_scores_time(event['votes']).keys())
-            row4 = "Locations - " + ', '.join(f"{l}" for l in wrapper.get_scores_location(event['votes']).keys())
+            row3 = "[Times]"
+            row4 = '\n'.join(f"{t}" for t in wrapper.get_scores_time(event['votes']).keys())
+            row5 = "[Locations]"
+            row6 = '\n'.join(f"{l}" for l in wrapper.get_scores_location(event['votes']).keys())
             
-            return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n' + row4
+            return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6
         
     class html_email:
 
@@ -216,13 +269,101 @@ class format:
             organizer = event_dict['sender']
             date = event_dict['date']
 
+            # Generate list items for times and locations
+            times_list_items = ''.join(f"<li>{t}</li>" for t in wrapper.get_scores_time(event_dict['votes']).keys())
+            locations_list_items = ''.join(f"<li>{l}</li>" for l in wrapper.get_scores_location(event_dict['votes']).keys())
+
+            html_content = f"""
+            <html>
+                <head>
+                    <style>
+                        body {{
+                            background-color: #f7f7f7;
+                            font-family: 'Helvetica', 'Arial', sans-serif;
+                            padding: 20px;
+                            color: #333;
+                        }}
+                        .container {{
+                            max-width: 600px;
+                            margin: auto;
+                            background: #fff;
+                            padding: 20px;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        }}
+                        h2 {{
+                            color: #ff9800;
+                            text-align: center;
+                        }}
+                        p, li {{
+                            font-size: 16px;
+                            color: #555;
+                            line-height: 1.5;
+                        }}
+                        a {{
+                            display: inline-block;
+                            background-color: #ff9800;
+                            color: #ffffff;
+                            text-decoration: none;
+                            padding: 10px 20px;
+                            border-radius: 5px;
+                            text-align: center;
+                            margin-top: 25px;
+                            transition: background-color 0.3s ease;
+                        }}
+                        a:hover {{
+                            background-color: #e68a00;
+                        }}
+                        ul {{
+                            list-style-type: none;
+                            padding: 0;
+                        }}
+                        li {{
+                            background: #f0f0f0;
+                            margin-bottom: 5px;
+                            padding: 5px;
+                            border-radius: 5px;
+                        }}
+                        h3 {{
+                            color: #333;
+                            font-size: 18px;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>You're Invited!</h2>
+                        <p>{organizer} is inviting you to an event on <strong>{date}</strong>!</p>
+                        <p style="text-align: center;">
+                            <a href="{voting_link}">Vote Now</a>
+                        </p>
+                        <div>
+                            <h3>Times:</h3>
+                            <ul>{times_list_items}</ul>
+                        </div>
+                        <div>
+                            <h3>Locations:</h3>
+                            <ul>{locations_list_items}</ul>
+                        </div>
+                    </div>
+                </body>
+            </html>
+            """
+            return html_content
+
+
+        @staticmethod
+        def get_invite2(event_dict: dict, voting_link: str) -> str:
+            organizer = event_dict['sender']
+            date = event_dict['date']
+
             html_content = f"""
             <html>
                 <head></head>
                 <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
                     <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <h2 style="color: #ff9800; text-align: center;">You're Invited!</h2>
-                        <p style="font-size: 16px; color: #555;">{organizer} is inviting you to an event on <strong>{date}</strong>!</p>
+                        <p style="font-size: 16px; color: #555;">{organizer} is inviting you to an event on <strong>{date}</strong></p>!
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="{voting_link}" style="background-color: #ff9800; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Vote Now</a>
                         </p>
