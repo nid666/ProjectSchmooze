@@ -7,7 +7,8 @@
 Open a terminal and run:
 
 ```bash
-$ pip3 install requirements.py
+$ git clone https://github.com/nid666/ProjectSchmooze.git
+$ pip3 install requirements.txt
 $ streamlit run schmooze.py
 ```
 
