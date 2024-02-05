@@ -11,7 +11,20 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
-st.markdown("<style> ul {display: none;} </style>", unsafe_allow_html=True)
+st.set_page_config(initial_sidebar_state="collapsed")
+
+st.markdown(
+    """
+<style>
+    [data-testid="collapsedControl"] {
+        display: none
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
 #checks if the email given to it is valid or not, returns a boolean
 def is_valid_email(email):
 
@@ -28,7 +41,8 @@ def is_valid_email(email):
 def mainPage():
     
 
-    with st.sidebar:
+    cols = st.columns([0.85, 0.15])
+    with cols[1]:
         authenticator = st.session_state['authObject']
         authenticator.logout()
 
@@ -44,9 +58,10 @@ def mainPage():
     time_slots = ["09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", 
                 "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", 
                 "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"]
+    
 
     # Select up to 3 time slots
-    selected_time_slots = st.multiselect("You may choose up to 3 time slots", time_slots)
+    selected_time_slots = st.multiselect("You may choose up to 3 time slots", options = time_slots, key="timeMultiselect", default=None) 
 
 
 

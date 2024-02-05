@@ -20,7 +20,7 @@ from yaml.loader import SafeLoader
 st.set_page_config(
     page_title="Project Schmooze",
     page_icon="🧊",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="collapsed",
     menu_items={
         'Get Help': None,
