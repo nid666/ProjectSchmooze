@@ -169,10 +169,6 @@ class format:
             budget = event['budget']
             organizer = event['sender']
             guests = event['recipients']
-            votes = event['votes']
-
-            winning_time = wrapper.get_winning_time(votes)
-            winning_location = wrapper.get_winning_location(votes)
 
             return f"[{TAG_COMPANY_NAME}] {organizer} sent an invitation on {wrapper.date_desc(date)}!"
     
@@ -232,7 +228,6 @@ class format:
             budget = event['budget']
             organizer = event['sender']
             guests = event['recipients']
-            votes = event['votes']
 
             row1 = f"{organizer} is inviting you to an event on {wrapper.date_desc(date)}!"
             row2 = f"Vote Now - {voting_link}"
@@ -291,6 +286,7 @@ class format:
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="{request_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Approve Event</a>
                         </p>
+                        <div style="margin: 30px 0; border-top: 2px solid #ccc;"></div>
                         <h3 style="color: #333;">Times:</h3>
                         {times_list_items}
                         <h3 style="color: #333;">Locations:</h3>
@@ -319,6 +315,7 @@ class format:
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="{voting_link}" style="background-color: #ff9800; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Vote Now</a>
                         </p>
+                        <div style="margin: 30px 0; border-top: 2px solid #ccc;"></div>
                         <h3 style="color: #333;"><strong>Times:</strong></h3>
                         {times_list_items}
                         <h3 style="color: #333;"><strong>Locations:</strong></h3>
