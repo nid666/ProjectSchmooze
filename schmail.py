@@ -129,7 +129,7 @@ class send:
         email_attachments = body.format.attachments.get_request(event_dict)
 
         recipients = [event_dict['sender']]
-        
+
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
 
     @staticmethod
