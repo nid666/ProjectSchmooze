@@ -7,7 +7,8 @@
 Open a terminal and run:
 
 ```bash
-$ pip3 install streamlit
+$ git clone https://github.com/nid666/ProjectSchmooze.git
+$ pip3 install requirements.txt
 $ streamlit run schmooze.py
 ```
 
@@ -32,7 +33,7 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Allow for multi email selection (Sid)
 
 ## Phase 3 ToDo
-- [ ] Hosted Publically with full userflow
+- [ ] Hosted Publically with full userflow *
 - [ ] Better data capturing for logged in users
 - [ ] Fix any bugs and optimize voting page
 - [ ] Double check API progress

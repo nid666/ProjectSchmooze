@@ -11,6 +11,20 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
+st.set_page_config(initial_sidebar_state="collapsed")
+
+st.markdown(
+    """
+<style>
+    [data-testid="collapsedControl"] {
+        display: none
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
 #checks if the email given to it is valid or not, returns a boolean
 def is_valid_email(email):
 
@@ -26,7 +40,8 @@ def is_valid_email(email):
 def mainPage():
     
 
-    with st.sidebar:
+    cols = st.columns([0.85, 0.15])
+    with cols[1]:
         authenticator = st.session_state['authObject']
         authenticator.logout()
 
@@ -35,15 +50,20 @@ def mainPage():
     st.markdown("<h1 style='text-align: center;'>Project Schmooze</h1>", unsafe_allow_html=True)
 
     # Select a date using streamlit date input
+    
     st.subheader("Select Reservation Date")
     selected_date = st.date_input(label="Select Reservation Date", value = datetime.date.today(), label_visibility="hidden")
     # Defining the time slots im selecting between, this can be changed to the time picker if we want any time to be selectable
     time_slots = ["09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", 
                 "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", 
                 "03:00 PM - 04:00 PM", "04:00 PM - 05:00 PM"]
+    
 
     # Select up to 3 time slots
-    selected_time_slots = st.multiselect("You may choose up to 3 time slots", time_slots)
+    selected_time_slots = st.multiselect("You may choose up to 3 time slots", options = time_slots, key="timeMultiselect", default=None) 
+
+
+
 
     # Limit the selection to 3
     if len(selected_time_slots) > 3:
@@ -154,9 +174,8 @@ def mainPage():
             notify.send.invite(uuid, "google.com", True) # temporary placeholder link for the voting page
 
 
-st.write(st.session_state)
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:
-    st.write(st.session_state)
+    #st.write(st.session_state)
     mainPage()
 else:
     st.error("Error: invalid login")

@@ -20,8 +20,8 @@ from yaml.loader import SafeLoader
 st.set_page_config(
     page_title="Project Schmooze",
     page_icon="🧊",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    layout="centered",
+    initial_sidebar_state="collapsed",
     menu_items={
         'Get Help': None,
         'Report a bug': None,
@@ -37,7 +37,7 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
-
+st.markdown("<style> ul {display: none;} </style>", unsafe_allow_html=True)
 
 
             
