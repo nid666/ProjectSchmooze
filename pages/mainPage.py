@@ -11,6 +11,7 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
+st.markdown("<style> ul {display: none;} </style>", unsafe_allow_html=True)
 #checks if the email given to it is valid or not, returns a boolean
 def is_valid_email(email):
 
@@ -36,6 +37,7 @@ def mainPage():
     st.markdown("<h1 style='text-align: center;'>Project Schmooze</h1>", unsafe_allow_html=True)
 
     # Select a date using streamlit date input
+    
     st.subheader("Select Reservation Date")
     selected_date = st.date_input(label="Select Reservation Date", value = datetime.date.today(), label_visibility="hidden")
     # Defining the time slots im selecting between, this can be changed to the time picker if we want any time to be selectable
@@ -45,6 +47,9 @@ def mainPage():
 
     # Select up to 3 time slots
     selected_time_slots = st.multiselect("You may choose up to 3 time slots", time_slots)
+
+
+
 
     # Limit the selection to 3
     if len(selected_time_slots) > 3:
@@ -156,9 +161,8 @@ def mainPage():
             notify.send.invite(uuid, "google.com", True) # temporary placeholder link for the voting page
 
 
-st.write(st.session_state)
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:
-    st.write(st.session_state)
+    #st.write(st.session_state)
     mainPage()
 else:
     st.error("Error: invalid login")
