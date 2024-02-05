@@ -1,27 +1,39 @@
 import os
+import arrow
 from ics import Calendar, Event
 from datetime import datetime, timedelta
 
 PATH_DIR_MAIL = "mail"
 TAG_COMPANY_NAME = "SCHMOOZE"
 
-def PATH_FILE_CAL_EVENT(name:str, location:str, desc:str, date:str, time_range:str)->str:
+# IMPLEMENT timezone options in events database!
+def PATH_FILE_CAL_EVENT(name: str, location: str, desc: str, date: str, time_range: str, organizer: str, timezone='America/New_York') -> str:
+    # Split the time range into start and end times
+    start_time_str, end_time_str = wrapper.time_split(time_range)
     
-    path = os.path.join(PATH_DIR_MAIL, f"{date}__{time_range}.ics")
-    start_time, end_time = wrapper.time_split(time_range)
-    
-    cal = Calendar()
+    # Convert start and end times to 24-hour format
+    start_time_24hr = wrapper.convert_time_to_24hr(start_time_str)
+    end_time_24hr = wrapper.convert_time_to_24hr(end_time_str)
 
+    # Set file path for the .ics file
+    path = os.path.join(PATH_DIR_MAIL, f"{name}.ics")
+    
+    # Create calendar and event objects
+    cal = Calendar()
     event = Event()
+    
+    # Set event details
     event.name = name
     event.location = location
     event.description = desc
-    event.duration = timedelta(hours=wrapper.length_hours(time_range))
-    #print("date string :: " + f"{date}{wrapper.convert_time_to_24hr(start_time)}")
-    event.begin = datetime.strptime(f"{date} {wrapper.convert_time_to_24hr(start_time)}", "%Y-%m-%d %H:%M")
+    event.organizer = organizer
 
+    # Set event start and end times with the specified timezone
+    event.begin = arrow.get(f"{date} {start_time_24hr}", 'YYYY-MM-DD HH:mm', tzinfo=timezone)
+    event.end = arrow.get(f"{date} {end_time_24hr}", 'YYYY-MM-DD HH:mm', tzinfo=timezone)
+
+    # Add event to calendar and write to file
     cal.events.add(event)
-
     with open(path, 'w') as f:
         f.writelines(cal.serialize_iter())
     
@@ -65,7 +77,7 @@ class wrapper:
 
     @staticmethod
     def convert_time_to_24hr(time_str):
-        time_obj = datetime.strptime(time_str, "%I:%M %p")
+        time_obj = datetime.strptime(str(time_str), "%I:%M %p")
         return time_obj.strftime("%H:%M")
 
     @staticmethod
@@ -73,9 +85,25 @@ class wrapper:
         return time_slot.split(" - ")
 
     @staticmethod
-    def length_hours(time_slot):
-        # Function to convert time to 24-hour format
+    def date_desc(date_string):
+        # Parse the input date string into a datetime object
+        date_obj = datetime.strptime(str(date_string), "%Y-%m-%d")
         
+        # Define a small helper function to determine the ordinal suffix for the day
+        def get_ordinal_suffix(day):
+            if 11 <= day <= 13:
+                return 'th'
+            else:
+                suffixes = {1: 'st', 2: 'nd', 3: 'rd'}
+                # Return 'th' as default if the day does not match any key in the suffixes dict
+                return suffixes.get(day % 10, 'th')
+        
+        # Format the date, appending the ordinal suffix to the day
+        formatted_date = date_obj.strftime(f"%B {date_obj.day}{get_ordinal_suffix(date_obj.day)}, %Y")
+        return formatted_date
+
+    @staticmethod
+    def length_hours(time_slot):
         # Split the time slot into start and end times
         start_time_str, end_time_str = wrapper.time_split(time_slot)
         
@@ -83,15 +111,18 @@ class wrapper:
         start_time_24hr = wrapper.convert_time_to_24hr(start_time_str)
         end_time_24hr = wrapper.convert_time_to_24hr(end_time_str)
         
-        # Parse the 24-hour format times into datetime objects
+        # Convert times to datetime objects to calculate the duration
         start_time_obj = datetime.strptime(start_time_24hr, "%H:%M")
         end_time_obj = datetime.strptime(end_time_24hr, "%H:%M")
         
-        # Calculate the difference in hours
-        time_difference = end_time_obj - start_time_obj
-        hours_difference = time_difference.total_seconds() / 3600  # Convert seconds to hours
+        # Handle case where end time is the next day
+        if end_time_obj <= start_time_obj:
+            end_time_obj += timedelta(days=1)
         
-        return hours_difference
+        # Calculate the duration in hours
+        duration = (end_time_obj - start_time_obj).total_seconds() / 3600.0
+        return duration
+        
 
 class format:
 
@@ -111,7 +142,7 @@ class format:
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
 
-            return f"[{TAG_COMPANY_NAME}] Add {wrapper.get_winning_location(votes)[0]} on {wrapper.get_winning_time(votes)[0]} to your calendar!"
+            return f"[{TAG_COMPANY_NAME}] Add {winning_location[0]} on {wrapper.date_desc(date)} ({winning_time[0]}) to your calendar!"
 
         @staticmethod
         def get_request(event: dict)->str:
@@ -127,7 +158,7 @@ class format:
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
 
-            return f"[{TAG_COMPANY_NAME}] Your event on {date} needs approval!"
+            return f"[{TAG_COMPANY_NAME}] Your event on {wrapper.date_desc(date)} needs approval!"
 
         @staticmethod
         def get_invite(event: dict)->str:
@@ -143,7 +174,7 @@ class format:
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
 
-            return f"[{TAG_COMPANY_NAME}] {organizer} sent an invitation on {date}!"
+            return f"[{TAG_COMPANY_NAME}] {organizer} sent an invitation on {wrapper.date_desc(date)}!"
     
     class raw_email:
 
@@ -162,8 +193,8 @@ class format:
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
 
-            row1 = f"{organizer}'s event on {winning_time} ({date}) at {winning_location} has been booked!"
-            row2 = f"Add this event to your calendar:"
+            row1 = f"{organizer}'s event on {wrapper.date_desc(date)} ({winning_time[0]}) at {winning_location[0]} has been booked!"
+            row2 = f"Add this event to your calendar"
             
             return row1 + '\n\n' + row2
 
@@ -182,13 +213,14 @@ class format:
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
 
-            row1 = f"Your event on {winning_time} ({date}) at {winning_location} needs approval!"
-            row2 = f"Approve: {request_link}"
-            row3 = "RESULTS:"
-            row4 = "Times - " + ', '.join(f"{t} ({score})" for t, score in wrapper.get_scores_time(event['votes']).items())
-            row5 = "Locations - " + ', '.join(f"{l} ({score})" for l, score in wrapper.get_scores_location(event['votes']).items())
+            row1 = f"{winning_location[0]} on {wrapper.date_desc(date)} ({winning_time[0]}) needs approval!"
+            row2 = f"Approve Event - {request_link}"
+            row3 = "Times:"
+            row4 = '\n'.join(f"{t} ({score}/{len(guests)})" for t, score in wrapper.get_scores_time(event['votes']).items())
+            row5 = "Locations:"
+            row6 = '\n'.join(f"{l} ({score}/{len(guests)})" for l, score in wrapper.get_scores_location(event['votes']).items())
             
-            return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n' + row5
+            return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6
 
         @staticmethod
         def get_invite(event: dict, voting_link:str)->str:
@@ -202,12 +234,12 @@ class format:
             guests = event['recipients']
             votes = event['votes']
 
-            row1 = f"{organizer} is inviting you to an event on {date}!"
-            row2 = f"Vote: {voting_link}"
-            row3 = "[Times]"
-            row4 = '\n'.join(f"{t}" for t in wrapper.get_scores_time(event['votes']).keys())
-            row5 = "[Locations]"
-            row6 = '\n'.join(f"{l}" for l in wrapper.get_scores_location(event['votes']).keys())
+            row1 = f"{organizer} is inviting you to an event on {wrapper.date_desc(date)}!"
+            row2 = f"Vote Now - {voting_link}"
+            row3 = "Times:"
+            row4 = '\n'.join(f"{t} ({score}/{len(guests)})" for t, score in sorted(wrapper.get_scores_time(event['votes']).items(), key=lambda item: item[0], reverse=True))
+            row5 = "Locations:"
+            row6 = '\n'.join(f"{l} ({score}/{len(guests)})" for l, score in sorted(wrapper.get_scores_location(event['votes']).items(), key=lambda item: item[0], reverse=True))
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6
         
@@ -226,11 +258,11 @@ class format:
                 <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
                     <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <h2 style="color: #4CAF50; text-align: center;">Event Approved</h2>
-                        <p style="font-size: 16px; color: #555;">
-                            {organizer}'s event on <strong>{winning_time} ({date})</strong> at <strong>{winning_location}</strong> has been booked!
+                        <p style="font-size: 16px; color: #555; text-align: center;">
+                            {organizer}'s event on <strong>{wrapper.date_desc(date)} ({winning_time[0]})</strong> at <strong>{winning_location[0]}</strong> has been booked!
                         </p>
                         <p style="text-align: center; margin-top: 25px;">
-                            <a href="#" style="background-color: #4CAF50; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Add to Calendar</a>
+                            <a href="#" style="background-color: #4CAF50; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Add this event to your calendar</a>
                         </p>
                     </div>
                 </body>
@@ -241,23 +273,28 @@ class format:
         @staticmethod
         def get_request(event_dict: dict, request_link: str) -> str:
             organizer = event_dict['sender']
+            guests = event_dict['recipients']
             winning_time = wrapper.get_winning_time(event_dict['votes'])
             date = event_dict['date']
             winning_location = wrapper.get_winning_location(event_dict['votes'])
+
+            times_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{t} ({score}/{len(guests)})</p>" for t, score in sorted(wrapper.get_scores_time(event_dict['votes']).items(), key=lambda item: item[0], reverse=True))
+            locations_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{l} ({score}/{len(guests)})</p>" for l, score in sorted(wrapper.get_scores_location(event_dict['votes']).items(), key=lambda item: item[0], reverse=True))
 
             html_content = f"""
             <html>
                 <head></head>
                 <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
                     <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <h2 style="color: #007bff; text-align: center;">Approval Needed</h2>
-                        <p style="font-size: 16px; color: #555;">Your event on <strong>{winning_time} ({date})</strong> at <strong>{winning_location}</strong> needs approval!</p>
+                        <h2 style="color: #007bff; text-align: center;">Approval Needed!</h2>
+                        <p style="font-size: 16px; color: #555; text-align: center;"><strong>{winning_location[0]}</strong> on <strong>{wrapper.date_desc(date)} ({winning_time[0]})</strong> needs approval!</p>
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="{request_link}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Approve Event</a>
                         </p>
-                        <h3 style="color: #333;">RESULTS:</h3>
-                        <p style="font-size: 14px; color: #555;">Times - {', '.join(f"{t} ({score})" for t, score in wrapper.get_scores_time(event_dict['votes']).items())}</p>
-                        <p style="font-size: 14px; color: #555;">Locations - {', '.join(f"{l} ({score})" for l, score in wrapper.get_scores_location(event_dict['votes']).items())}</p>
+                        <h3 style="color: #333;">Times:</h3>
+                        {times_list_items}
+                        <h3 style="color: #333;">Locations:</h3>
+                        {locations_list_items}
                     </div>
                 </body>
             </html>
@@ -269,93 +306,8 @@ class format:
             organizer = event_dict['sender']
             date = event_dict['date']
 
-            # Generate list items for times and locations
-            times_list_items = ''.join(f"<li>{t}</li>" for t in wrapper.get_scores_time(event_dict['votes']).keys())
-            locations_list_items = ''.join(f"<li>{l}</li>" for l in wrapper.get_scores_location(event_dict['votes']).keys())
-
-            html_content = f"""
-            <html>
-                <head>
-                    <style>
-                        body {{
-                            background-color: #f7f7f7;
-                            font-family: 'Helvetica', 'Arial', sans-serif;
-                            padding: 20px;
-                            color: #333;
-                        }}
-                        .container {{
-                            max-width: 600px;
-                            margin: auto;
-                            background: #fff;
-                            padding: 20px;
-                            border-radius: 10px;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        }}
-                        h2 {{
-                            color: #ff9800;
-                            text-align: center;
-                        }}
-                        p, li {{
-                            font-size: 16px;
-                            color: #555;
-                            line-height: 1.5;
-                        }}
-                        a {{
-                            display: inline-block;
-                            background-color: #ff9800;
-                            color: #ffffff;
-                            text-decoration: none;
-                            padding: 10px 20px;
-                            border-radius: 5px;
-                            text-align: center;
-                            margin-top: 25px;
-                            transition: background-color 0.3s ease;
-                        }}
-                        a:hover {{
-                            background-color: #e68a00;
-                        }}
-                        ul {{
-                            list-style-type: none;
-                            padding: 0;
-                        }}
-                        li {{
-                            background: #f0f0f0;
-                            margin-bottom: 5px;
-                            padding: 5px;
-                            border-radius: 5px;
-                        }}
-                        h3 {{
-                            color: #333;
-                            font-size: 18px;
-                        }}
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h2>You're Invited!</h2>
-                        <p>{organizer} is inviting you to an event on <strong>{date}</strong>!</p>
-                        <p style="text-align: center;">
-                            <a href="{voting_link}">Vote Now</a>
-                        </p>
-                        <div>
-                            <h3>Times:</h3>
-                            <ul>{times_list_items}</ul>
-                        </div>
-                        <div>
-                            <h3>Locations:</h3>
-                            <ul>{locations_list_items}</ul>
-                        </div>
-                    </div>
-                </body>
-            </html>
-            """
-            return html_content
-
-
-        @staticmethod
-        def get_invite2(event_dict: dict, voting_link: str) -> str:
-            organizer = event_dict['sender']
-            date = event_dict['date']
+            times_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{t}</p>" for t in wrapper.get_scores_time(event_dict['votes']).keys())
+            locations_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{l}</p>" for l in wrapper.get_scores_location(event_dict['votes']).keys())
 
             html_content = f"""
             <html>
@@ -363,13 +315,14 @@ class format:
                 <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
                     <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <h2 style="color: #ff9800; text-align: center;">You're Invited!</h2>
-                        <p style="font-size: 16px; color: #555;">{organizer} is inviting you to an event on <strong>{date}</strong></p>!
+                        <p style="font-size: 16px; color: #555; text-align: center;">{organizer} is inviting you to an event on <strong>{wrapper.date_desc(date)}</strong>!</p>
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="{voting_link}" style="background-color: #ff9800; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Vote Now</a>
                         </p>
-                        <h3 style="color: #333;">Options:</h3>
-                        <p style="font-size: 14px; color: #555;">Times - {', '.join(f"{t}" for t in wrapper.get_scores_time(event_dict['votes']).keys())}</p>
-                        <p style="font-size: 14px; color: #555;">Locations - {', '.join(f"{l}" for l in wrapper.get_scores_location(event_dict['votes']).keys())}</p>
+                        <h3 style="color: #333;"><strong>Times:</strong></h3>
+                        {times_list_items}
+                        <h3 style="color: #333;"><strong>Locations:</strong></h3>
+                        {locations_list_items}
                     </div>
                 </body>
             </html>
@@ -402,7 +355,7 @@ class format:
             ret = []
 
             # PATH_FILE_CAL_EVENT(name:str, location:str, desc:str, date:str, time_range:str)
-            ret.append(PATH_FILE_CAL_EVENT(f"{organizer}--{date}({winning_time_name})", winning_loc_name, "{winning_loc_name} @ {date} ({winning_time_name}) with {organizer}!", date, winning_time_name))
+            ret.append(PATH_FILE_CAL_EVENT(f"{winning_loc_name}_{date}", winning_loc_name, f"{winning_loc_name} @ {wrapper.date_desc(date)} ({winning_time_name}) with {organizer}!", date, winning_time_name, organizer))
         
             return ret
 
