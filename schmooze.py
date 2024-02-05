@@ -239,8 +239,6 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-
-
 authenticator.login()
 if 'authObject' not in st.session_state:
     st.session_state['authObject'] = authenticator

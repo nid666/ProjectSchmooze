@@ -23,7 +23,6 @@ def is_valid_email(email):
     else:
         return False
 
-
 def mainPage():
     
 
@@ -137,20 +136,19 @@ def mainPage():
             #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
             
             event = {}
-            event['uuid'] = uuid
-            event['date'] = selected_date
-            event['times'] = selected_time_slots
-            event['locations'] = st.session_state['locations']
-            event['budget'] = budget
+            event['uuid'] = str(uuid)
+            event['date'] = str(selected_date)
+            event['times'] = list(selected_time_slots)
+            event['locations'] = list(st.session_state['locations'])
+            event['budget'] = int(budget)
             event['sender'] = "TEMPORARY_VALUE" # needs organizer's email address
-            event['recipients'] = st.session_state['emails']
+            event['recipients'] = list(st.session_state['emails'])
             event['votes'] = {}
 
             edb.event.details.serialize(event)
             
             st.write(event)
             
-
             st.toast("Invite sent successfully!")
 
             notify.send.invite(uuid, "google.com", True) # temporary placeholder link for the voting page
