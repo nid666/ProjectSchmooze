@@ -58,7 +58,7 @@ class event:
 
             if event.voting._is_ready_(uuid):
                 print("EMAIL SENT")
-                notify.send.request(uuid, f"http://localhost:8501/?uuid={uuid}&apr=get", True) # temporary WEBSITE placeholder for approval page
+                notify.send.request(uuid, f"http://schmooze.us.to/?uuid={uuid}&apr=get", True) # temporary WEBSITE placeholder for approval page
             else:
                 print("EMAIL NOT SENT")
 
