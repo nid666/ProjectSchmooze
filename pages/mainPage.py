@@ -140,7 +140,6 @@ def mainPage():
 
 
 
-
     # Display the chosen date and time slots, this would need to go 
     # into whatever database or whatever we are using
     if st.button('Confirm Reservation', use_container_width=True, type = "primary"):
@@ -154,18 +153,24 @@ def mainPage():
 
             #location_images = ["placeholder_link.com" for _ in range(len(st.session_state.get(locations)))]
             #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
-            
-            event = {}
-            event['uuid'] = str(uuid)
-            event['date'] = str(selected_date)
-            event['times'] = list(selected_time_slots)
-            event['locations'] = list(st.session_state['locations'])
-            event['budget'] = int(budget)
-            event['sender'] = "TEMPORARY_VALUE" # needs organizer's email address
-            event['recipients'] = list(st.session_state['emails'])
-            event['votes'] = {}
+
+            # Assuming this part is inside the 'Confirm Reservation' button callback
+            event = {
+                'uuid': str(uuid),
+                'date': selected_date.strftime('%Y-%m-%d'),  # Convert to string in YYYY-MM-DD format
+                'times': [str(e) for e in selected_time_slots],
+                'locations': [str(l) for l in st.session_state['locations']],
+                'budget': str(budget),  # Convert to string if necessary
+                'sender': "TEMPORARY_VALUE",
+                'recipients': [str(e) for e in st.session_state['emails']],
+                'votes': {}
+            }
+
+            # Proceed with serialization and emailing
+
 
             edb.event.details.serialize(event)
+            print(event)
             
             st.write(event)
             
