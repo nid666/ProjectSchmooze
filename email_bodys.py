@@ -212,9 +212,9 @@ class format:
             row1 = f"{winning_location[0]} on {wrapper.date_desc(date)} ({winning_time[0]}) needs approval!"
             row2 = f"Approve Event - {request_link}"
             row3 = "Times:"
-            row4 = '\n'.join(f"{t} ({score}/{len(guests)})" for t, score in wrapper.get_scores_time(event['votes']).items())
+            row4 = '\n'.join(f"{t} ({score}/{len(guests)})" for t, score in sorted(wrapper.get_scores_time(event['votes']).items(), key=lambda item: item[0], reverse=True))
             row5 = "Locations:"
-            row6 = '\n'.join(f"{l} ({score}/{len(guests)})" for l, score in wrapper.get_scores_location(event['votes']).items())
+            row6 = '\n'.join(f"{l} ({score}/{len(guests)})" for l, score in sorted(wrapper.get_scores_location(event['votes']).items(), key=lambda item: item[0], reverse=True))
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6
 
@@ -232,9 +232,9 @@ class format:
             row1 = f"{organizer} is inviting you to an event on {wrapper.date_desc(date)}!"
             row2 = f"Vote Now - {voting_link}"
             row3 = "Times:"
-            row4 = '\n'.join(f"{t} ({score}/{len(guests)})" for t, score in sorted(wrapper.get_scores_time(event['votes']).items(), key=lambda item: item[0], reverse=True))
+            row4 = '\n'.join(f"{t}" for t in times)
             row5 = "Locations:"
-            row6 = '\n'.join(f"{l} ({score}/{len(guests)})" for l, score in sorted(wrapper.get_scores_location(event['votes']).items(), key=lambda item: item[0], reverse=True))
+            row6 = '\n'.join(f"{l}" for l in locations)
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6
         
@@ -301,9 +301,11 @@ class format:
         def get_invite(event_dict: dict, voting_link: str) -> str:
             organizer = event_dict['sender']
             date = event_dict['date']
+            times = event_dict['times']
+            locations = event_dict['locations']
 
-            times_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{t}</p>" for t in wrapper.get_scores_time(event_dict['votes']).keys())
-            locations_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{l}</p>" for l in wrapper.get_scores_location(event_dict['votes']).keys())
+            times_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{t}</p>" for t in times)
+            locations_list_items = ''.join(f"<p style='font-size: 11px; color: #555;'>{l}</p>" for l in locations)
 
             html_content = f"""
             <html>

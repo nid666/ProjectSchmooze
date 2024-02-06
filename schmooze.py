@@ -207,9 +207,6 @@ def renderVotingPage():
             #sets the cookie to the new value
             cookie_manager.set("results", vote_result)
 
-
-
-
             # Convert the dictionary to a JSON object
             vote_json = json.dumps(vote_result)
 

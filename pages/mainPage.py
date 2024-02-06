@@ -11,6 +11,109 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
+#####
+
+import uuid
+import pickle
+import os
+import schmail as notify
+
+PATH_DIR_ALL_EVENTS = "events"
+
+def generate_UUID() -> str:
+    # Generate a unique UUID
+    unique_id = uuid.uuid4()
+    return str(unique_id)
+
+def PATH_FILE_EVENT(uuid:str) -> str:
+    return os.path.join(PATH_DIR_ALL_EVENTS, f"{uuid}.pkl")
+
+class event:
+
+    class voting:
+
+        @staticmethod
+        def vote(uuid:str, vote_dict:dict)->bool:
+            event_dict = event.details.unserialize(uuid)
+            event_dict["votes"][vote_dict["voting_id"]] = vote_dict
+            event.details.serialize(event_dict)
+
+            majority_index = (len(event_dict["recipients"]) / 2) + 1
+
+            all_voted = (len(event_dict["votes"])) >= majority_index
+            if(all_voted): notify.send.request(uuid, "google.com", True) # temporary WEBSITE placeholder for approval page
+
+        @staticmethod
+        def get_current_winner() -> None:
+            # time > location
+            # how to handle conflicts within recipient times, and between recipient times and location availablility (booked, closed, ...)
+            # recipients speciy times?
+            return
+
+        # boolean function used to indicate approval email
+        @staticmethod
+        def is_complete() -> bool:
+            return False
+
+        # handles revotes by comparing, editing existing pkl file with unique voting_uuid
+        @staticmethod
+        def send(voting_uuid: str):
+            return        
+
+    class details:
+
+        @staticmethod
+        def serialize(event_dict: dict) -> None:
+            file_path = PATH_FILE_EVENT(event_dict["uuid"])
+            try:
+                with open(file_path, 'wb') as file:
+                    pickle.dump(event_dict, file)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+        # run without arguments to get all events
+        @staticmethod
+        def unserialize(event_uuid="all") -> dict:
+            
+            file_path = PATH_FILE_EVENT(event_uuid)
+
+            # Check if the file exists, if not and the event_uuid is not 'all', return None
+            if not event_uuid == "all" and not os.path.exists(file_path):
+                print(f"No file found for UUID: {event_uuid}")
+                return None
+            
+            if file_path.lower().endswith("all"):
+                
+                aggregated_dict = {}
+                try:
+                    # Iterate over all files in the directory
+                    for filename in os.listdir(PATH_DIR_ALL_EVENT_DATAS):
+                        if filename.endswith('.pkl'):
+                            file_path = os.path.join(PATH_DIR_ALL_EVENTS, filename)
+                            with open(file_path, 'rb') as file:
+                                # Deserialize the contents of the pickle file
+                                data = pickle.load(file)
+                                # Use the filename without extension as the key
+                                key = os.path.splitext(filename)[0]
+                                aggregated_dict[key] = data
+                    return aggregated_dict
+                
+                except Exception as e:
+                    print(f"An error occurred: {e}")
+                    return {}
+                
+                
+            try:
+                with open(file_path, 'rb') as file:
+                    data = pickle.load(file)
+                    return data
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+            return {}
+
+#####
+
 st.set_page_config(initial_sidebar_state="collapsed")
 
 st.markdown(
@@ -154,29 +257,39 @@ def mainPage():
             #location_images = ["placeholder_link.com" for _ in range(len(st.session_state.get(locations)))]
             #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
 
-            # Assuming this part is inside the 'Confirm Reservation' button callback
-            event = {
+            # Proceed with serialization and emailing
+
+            events_dict = {
                 'uuid': str(uuid),
                 'date': selected_date.strftime('%Y-%m-%d'),  # Convert to string in YYYY-MM-DD format
                 'times': [str(e) for e in selected_time_slots],
                 'locations': [str(l) for l in st.session_state['locations']],
-                'budget': str(budget),  # Convert to string if necessary
+                'budget': int(budget),  # Convert to string if necessary
                 'sender': "TEMPORARY_VALUE",
                 'recipients': [str(e) for e in st.session_state['emails']],
                 'votes': {}
             }
 
-            # Proceed with serialization and emailing
+            tempevent = edb.event.details.serialize(events_dict)
 
-
-            edb.event.details.serialize(event)
-            print(event)
+            ret = ""
+            for k in tempevent.keys():
+                val = tempevent[k]
+                if(type([]) == type(val)):
+                    ret += "\t[\n"
+                    for e in val:
+                        ret += f"\t\t{e} ({type(e)})\n"
+                    print('\t]\n')
+                else:
+                    ret += f"\t{val} ({type(val)}),\n"
+            print('{\n' + ret + '}')
+            print(ret)
             
-            st.write(event)
+            st.write(tempevent)
             
             st.toast("Invite sent successfully!")
 
-            notify.send.invite(uuid, "google.com", True) # temporary placeholder link for the voting page
+            notify.send.invite(uuid, f"http://schmooze.us.to/?uuid={uuid}", True) # temporary placeholder link for the voting page
 
 
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:
