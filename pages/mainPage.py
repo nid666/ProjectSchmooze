@@ -67,7 +67,7 @@ def mainPage():
 
     
     # Title so that it can be centered
-    st.markdown("<h1 style='text-align: center;'>Project Schmooze</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>testProject Schmooze</h1>", unsafe_allow_html=True)
 
     # Select a date using streamlit date input
     
