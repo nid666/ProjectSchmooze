@@ -10,7 +10,6 @@ import events_database as edb
 import streamlit_authenticator as stauth
 import yaml
 
-
 #delete this import later
 import cProfile
 #Sign in system:import yaml
@@ -227,7 +226,6 @@ def getLoginConfig():
 
 config = getLoginConfig()
 
-
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
@@ -239,15 +237,15 @@ authenticator = stauth.Authenticate(
 authenticator.login()
 if 'authObject' not in st.session_state:
     st.session_state['authObject'] = authenticator
-    
+
 def main():
     if st.query_params.get("uuid") == None:
         #Handles logging on
         if st.session_state["authentication_status"]:
             with st.spinner("Loading Page..."):
+                st.session_state["email"] = config["credentials"]["usernames"][st.session_state["username"]]["email"]
                 #This sleep is here to prevent widgets from rendering out of order due to rendering quicker than others
                 time.sleep(1)
-                
                 #If logged in successfully, render the main page
                 st.switch_page("pages/mainPage.py")
         elif st.session_state["authentication_status"] is False:
