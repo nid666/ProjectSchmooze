@@ -176,7 +176,7 @@ def mainPage():
 
             # Proceed with serialization and emailing
 
-            events_dict = {
+            st.session_state["events_dict"] = {
                 'uuid': str(uuid),
                 'date': selected_date.strftime('%Y-%m-%d'),  # Convert to string in YYYY-MM-DD format
                 'times': [str(e) for e in selected_time_slots],
@@ -187,13 +187,13 @@ def mainPage():
                 'votes': {}
             }
 
-            edb.event.details.serialize(events_dict)
+            edb.event.details.serialize(st.session_state["events_dict"])
             
-            st.write(events_dict)
+            st.write(st.session_state["events_dict"])
             
             st.toast("Invite sent successfully!")
 
-            notify.send.invite(uuid, f"http://schmooze.us.to/?uuid={uuid}", True) # temporary placeholder link for the voting page
+            notify.send.invite(st.session_state["events_dict"]["uuid"], f"http://schmooze.us.to/?uuid={uuid}", True) # temporary placeholder link for the voting page
 
 
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:
