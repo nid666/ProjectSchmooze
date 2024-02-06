@@ -28,16 +28,16 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Notify user if all clients have voted to finalize the reservation (Dean)
 - [x] Notify clients of confirmed reservation (Dean)
 - [x] Do calendar invites in email (Dean)
-- [ ] Show final result (Sid)
 - [x] Fix any bugs in email system (Dean)
 - [x] Allow for multi email selection (Sid)
 
 ## Phase 3 ToDo
 - [ ] Hosted Publically with full userflow *
 - [ ] Better data capturing for logged in users
-- [ ] Fix any bugs and optimize voting page
-- [ ] Double check API progress
-  
+- [x] Fix any bugs and optimize voting page
+- [x] Double check API progress
+- [ ] Show final result (Sid)
+
 ## Phase 4 ToDo (Post API)
 - Distance radius (tentative)
 - Radius to search for entertainment options/restaurants
