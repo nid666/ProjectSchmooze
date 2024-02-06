@@ -270,26 +270,13 @@ def mainPage():
                 'votes': {}
             }
 
-            tempevent = edb.event.details.serialize(events_dict)
-
-            ret = ""
-            for k in tempevent.keys():
-                val = tempevent[k]
-                if(type([]) == type(val)):
-                    ret += "\t[\n"
-                    for e in val:
-                        ret += f"\t\t{e} ({type(e)})\n"
-                    print('\t]\n')
-                else:
-                    ret += f"\t{val} ({type(val)}),\n"
-            print('{\n' + ret + '}')
-            print(ret)
+            edb.event.details.serialize(events_dict)
             
-            st.write(tempevent)
+            st.write(events_dict)
             
             st.toast("Invite sent successfully!")
 
-            notify.send.invite(uuid, f"http://schmooze.us.to/?uuid={uuid}", True) # temporary placeholder link for the voting page
+            notify.send.invite(uuid, f"http://localhost:8501/?uuid={uuid}", True) # temporary placeholder link for the voting page
 
 
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:

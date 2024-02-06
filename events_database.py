@@ -55,7 +55,6 @@ class event:
                     pickle.dump(event_dict, file)
             except Exception as e:
                 print(f"An error occurred: {e}")
-            return event.details.unserialize(event_dict['uuid'])
 
         # run without arguments to get all events
         @staticmethod
