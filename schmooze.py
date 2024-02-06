@@ -253,7 +253,16 @@ def main():
         elif st.session_state["authentication_status"] is None:
             st.warning('Please enter your username and password')
     else:
-        renderVotingPage()
+        approval_param = st.query_params.get("apr")
+        if approval_param == "get":
+            event_dict = edb.event.details.unserialize(st.query_params.get("uuid"))
+            st.session_state['uuid'] = st.query_params.get("uuid") #
+            if edb.event.voting._is_ready_(event_dict["uuid"]) and (config["credentials"]["usernames"][st.session_state["username"]]["email"] == event_dict["sender"]):
+                with st.spinner("Loading Page..."):
+                    time.sleep(1)
+                    st.switch_page("pages/aprPage.py")
+        else:
+            renderVotingPage()
 
 
 main()

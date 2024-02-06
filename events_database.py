@@ -18,15 +18,49 @@ class event:
     class voting:
 
         @staticmethod
+        def _is_ready_(uuid:str):
+            event_dict = event.details.unserialize(uuid)
+
+            check_dict = {"times": {}, "locations": {}}
+            for e_k in event_dict["votes"].keys():
+                e_v = event_dict["votes"][e_k]
+                location = e_v["selected_location"]
+                if location not in check_dict["locations"].keys():
+                    check_dict["locations"][location] = 1
+                else:
+                    check_dict["locations"][location] += 1
+                time = e_v["selected_time"]
+                if time not in check_dict["times"].keys():
+                    check_dict["times"][time] = 1
+                else:
+                    check_dict["times"][time] += 1
+
+            rec_max = int((len(event_dict["recipients"]) / 2) + 1)
+            max_times_key, max_times_value = max(check_dict["times"].items(), key=lambda x: x[1])
+            max_locations_key, max_locations_value = max(check_dict["locations"].items(), key=lambda x: x[1])
+
+            time_max = (max_times_value >= rec_max)
+            loc_max = (max_locations_value >= rec_max)
+            len_max = len(event_dict["votes"]) == len(event_dict["recipients"])
+
+            print(f"{max_times_key} : {max_times_value}\n{max_locations_key} : {max_locations_value}\nrec max: {rec_max}\ntime max: {time_max}\nloc amx:{loc_max}\nlen max: {len_max}")
+
+            return (time_max and loc_max) or len_max # returns true if # of time, locations is greater than len(recipients)+1
+            
+
+        @staticmethod
         def vote(uuid:str, vote_dict:dict)->bool:
             event_dict = event.details.unserialize(uuid)
             event_dict["votes"][vote_dict["voting_id"]] = vote_dict
             event.details.serialize(event_dict)
 
-            majority_index = (len(event_dict["recipients"]) / 2) + 1
+            print("VOTE CAST!")
 
-            all_voted = (len(event_dict["votes"])) >= majority_index
-            if(all_voted): notify.send.request(uuid, "google.com", True) # temporary WEBSITE placeholder for approval page
+            if event.voting._is_ready_(uuid):
+                print("EMAIL SENT")
+                notify.send.request(uuid, f"http://localhost:8501/?uuid={uuid}&apr=get", True) # temporary WEBSITE placeholder for approval page
+            else:
+                print("EMAIL NOT SENT")
 
         @staticmethod
         def get_current_winner() -> None:
