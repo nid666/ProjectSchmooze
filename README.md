@@ -35,8 +35,6 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Hosted Publically with full userflow 
 - [x] Fix any bugs and optimize voting page
 - [x] Double check API progress
-
-## Phase 4 ToDo
 - [ ] Fix bug when hosted
 - [ ] Deadline to cast vote
 - [ ] Reminder email one day before vote deadline 
@@ -50,8 +48,7 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] add in forgot password and create account screens (sid)
 - [ ] fix bugs
 
-
-## Phase 5 ToDo (Post API)
+## Phase 4 ToDo (Post API)
 - Distance radius (tentative)
 - Radius to search for entertainment options/restaurants
 - Automatic selection of locations based upon budgets
