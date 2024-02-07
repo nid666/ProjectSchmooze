@@ -41,13 +41,13 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Deadline to cast vote
 - [ ] Reminder email one day before vote deadline 
 - [ ] Show final result
-- [ ] Add sender name
-- [ ] add sender company and location
-- [ ] change time to be custom string input
-- [ ] and comment section
-- [ ] verify if email section is blank before allowing sending of emails
-- [ ] automatically clear email input once an email is entered
-- [ ] add in forgot password and create account screens
+- [ ] Add sender name (sid)
+- [ ] add sender company and location (sid)
+- [ ] change time to be custom string input (sid)
+- [ ] add comment section
+- [ ] verify if email section is blank before allowing sending of emails (sid)
+- [ ] automatically clear email input once an email is entered (sid)
+- [ ] add in forgot password and create account screens (sid)
 - [ ] fix bugs
 
 
