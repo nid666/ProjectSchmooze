@@ -32,16 +32,29 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Allow for multi email selection (Sid)
 
 ## Phase 3 ToDo
-- [ ] Hosted Publically with full userflow *
-- [ ] Better data capturing for logged in users
+- [x] Hosted Publically with full userflow 
 - [x] Fix any bugs and optimize voting page
 - [x] Double check API progress
-- [ ] Show final result (Sid)
 
-## Phase 4 ToDo (Post API)
+## Phase 4 ToDo
+- [ ] Fix bug when hosted
+- [ ] Deadline to cast vote
+- [ ] Reminder email one day before vote deadline 
+- [ ] Show final result
+- [ ] Add sender name
+- [ ] add sender company and location
+- [ ] change time to be custom string input
+- [ ] and comment section
+- [ ] verify if email section is blank before allowing sending of emails
+- [ ] automatically clear email input once an email is entered
+- [ ] add in forgot password and create account screens
+- [ ] fix bugs
+
+
+## Phase 5 ToDo (Post API)
 - Distance radius (tentative)
 - Radius to search for entertainment options/restaurants
 - Automatic selection of locations based upon budgets
 - [ ] Setup api to allow automatic booking once a vote is finalized
 - [ ] check if a restaunt is avaliable at a given time
-
+- [ ] Better data capturing for logged in users
