@@ -45,7 +45,7 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] add comment section (dean)
 - [ ] verify if email section is blank before allowing sending of emails (sid)
 - [ ] automatically clear email input once an email is entered (sid)
-- [ ] add in forgot password and create account screens (sid)
+- [x] add in forgot password and create account screens (sid)
 - [ ] fix bugs (dean)
 
 ## Phase 4 ToDo (Post API)
@@ -55,3 +55,5 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Setup api to allow automatic booking once a vote is finalized
 - [ ] check if a restaunt is avaliable at a given time
 - [ ] Better data capturing for logged in users
+- [ ] Send forgotten password info in an email to user
+- [ ] Add reset password screen
