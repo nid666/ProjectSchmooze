@@ -65,6 +65,7 @@ config = getLoginConfig()
 
 st.write(config)
 
+st.write(authenticator.credentials)
 
 try:
     email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(preauthorization=False)
@@ -76,6 +77,8 @@ try:
         
 
         st.toast('User Registered Successfully')
+
+    config['credentials'] = authenticator.credentials
 
     with open('pages/config.yaml', 'w') as file:
             yaml.dump(config, file, default_flow_style=False)
