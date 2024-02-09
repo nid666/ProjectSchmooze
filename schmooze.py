@@ -9,9 +9,8 @@ import extra_streamlit_components as stx
 import events_database as edb
 import streamlit_authenticator as stauth
 import yaml
+from streamlit_option_menu import option_menu
 
-#delete this import later
-import cProfile
 #Sign in system:import yaml
 from yaml.loader import SafeLoader
 
@@ -39,8 +38,14 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.markdown("<style> ul {display: none;} </style>", unsafe_allow_html=True)
 
 
+loginOptionMenu = option_menu(None, ["Login", "Create Account", "Forgot Password"], 
+    icons=['box-arrow-in-right', 'person-plus-fill', "patch-question-fill"], 
+    menu_icon="cast", default_index=0, orientation="horizontal")
 
-
+if loginOptionMenu == "Create Account":
+    st.switch_page("pages/createAccount.py")
+elif loginOptionMenu == "Forgot Password":
+    st.switch_page("pages/forgotPassword.py")
 
 def getLoginConfig():
     with open('config.yaml') as file:
