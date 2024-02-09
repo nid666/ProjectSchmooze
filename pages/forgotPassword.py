@@ -46,3 +46,36 @@ if loginOptionMenu == "Create Account":
     st.switch_page("pages/createAccount.py")
 elif loginOptionMenu == "Login":
     st.switch_page("schmooze.py")
+
+
+
+authenticator = st.session_state['authObject']
+
+
+def getLoginConfig():
+    with open('pages/config.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
+    return config
+
+config = getLoginConfig()
+
+try:
+
+    #TODO These 3 below variables need to be emailed to user
+    username_of_forgotten_password, email_of_forgotten_password, new_random_password = authenticator.forgot_password()
+
+
+    if username_of_forgotten_password:
+        st.success('New password to be sent securely')
+        # The developer should securely transfer the new password to the user.
+
+        config['credentials'] = authenticator.credentials
+
+        with open('pages/config.yaml', 'w') as file:
+                yaml.dump(config, file, default_flow_style=False)
+    elif username_of_forgotten_password == False:
+        st.error('Username not found')
+except Exception as e:
+    st.error(e)
+
+st.header("WIP")
