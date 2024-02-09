@@ -6,3 +6,4 @@ streamlit-extras
 extra-streamlit-components
 streamlit-authenticator
 pyyaml
+streamlit_javascript
