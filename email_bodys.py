@@ -1,5 +1,7 @@
 import os
 import arrow
+import yaml
+from yaml.loader import SafeLoader
 from ics import Calendar, Event
 from datetime import datetime, timedelta
 
@@ -168,9 +170,10 @@ class format:
             locations = event['locations']
             budget = event['budget']
             organizer = event['sender']
+            name = event['name']
             guests = event['recipients']
 
-            return f"[{TAG_COMPANY_NAME}] {organizer} sent an invitation on {wrapper.date_desc(date)}!"
+            return f"[{TAG_COMPANY_NAME}] {name} sent an invitation on {wrapper.date_desc(date)}!"
     
     class raw_email:
 
@@ -183,13 +186,14 @@ class format:
             locations = event['locations']
             budget = event['budget']
             organizer = event['sender']
+            name = event['name']
             guests = event['recipients']
             votes = event['votes']
 
             winning_time = wrapper.get_winning_time(votes)
             winning_location = wrapper.get_winning_location(votes)
 
-            row1 = f"{organizer}'s event on {wrapper.date_desc(date)} ({winning_time[0]}) at {winning_location[0]} has been booked!"
+            row1 = f"{name}'s event on {wrapper.date_desc(date)} ({winning_time[0]}) at {winning_location[0]} has been booked!"
             row2 = f"Add this event to your calendar"
             
             return row1 + '\n\n' + row2
@@ -227,9 +231,10 @@ class format:
             locations = event['locations']
             budget = event['budget']
             organizer = event['sender']
+            name = event['name']
             guests = event['recipients']
 
-            row1 = f"{organizer} is inviting you to an event on {wrapper.date_desc(date)}!"
+            row1 = f"{name} is inviting you to an event on {wrapper.date_desc(date)}!"
             row2 = f"Vote Now - {voting_link}"
             row3 = "Times:"
             row4 = '\n'.join(f"{t}" for t in times)
@@ -243,6 +248,7 @@ class format:
         @staticmethod
         def get_approve(event_dict: dict) -> str:
             organizer = event_dict['sender']
+            name = event_dict['name']
             winning_time = wrapper.get_winning_time(event_dict['votes'])
             date = event_dict['date']
             winning_location = wrapper.get_winning_location(event_dict['votes'])
@@ -254,7 +260,7 @@ class format:
                     <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <h2 style="color: #4CAF50; text-align: center;">Event Approved</h2>
                         <p style="font-size: 16px; color: #555; text-align: center;">
-                            {organizer}'s event on <strong>{wrapper.date_desc(date)} ({winning_time[0]})</strong> at <strong>{winning_location[0]}</strong> has been booked!
+                            {name}'s event on <strong>{wrapper.date_desc(date)} ({winning_time[0]})</strong> at <strong>{winning_location[0]}</strong> has been booked!
                         </p>
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="#" style="background-color: #4CAF50; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Add this event to your calendar</a>
@@ -268,6 +274,7 @@ class format:
         @staticmethod
         def get_request(event_dict: dict, request_link: str) -> str:
             organizer = event_dict['sender']
+            name = event_dict['name']
             guests = event_dict['recipients']
             winning_time = wrapper.get_winning_time(event_dict['votes'])
             date = event_dict['date']
@@ -300,6 +307,7 @@ class format:
         @staticmethod
         def get_invite(event_dict: dict, voting_link: str) -> str:
             organizer = event_dict['sender']
+            name = event_dict['name']
             date = event_dict['date']
             times = event_dict['times']
             locations = event_dict['locations']
@@ -313,7 +321,7 @@ class format:
                 <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
                     <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <h2 style="color: #ff9800; text-align: center;">You're Invited!</h2>
-                        <p style="font-size: 16px; color: #555; text-align: center;">{organizer} is inviting you to an event on <strong>{wrapper.date_desc(date)}</strong>!</p>
+                        <p style="font-size: 16px; color: #555; text-align: center;">{name} is inviting you to an event on <strong>{wrapper.date_desc(date)}</strong>!</p>
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="{voting_link}" style="background-color: #ff9800; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Vote Now</a>
                         </p>
@@ -339,6 +347,7 @@ class format:
             locations = event['locations']
             budget = event['budget']
             organizer = event['sender']
+            name = event['name']
             guests = event['recipients']
             votes = event['votes']
 
@@ -354,7 +363,7 @@ class format:
             ret = []
 
             # PATH_FILE_CAL_EVENT(name:str, location:str, desc:str, date:str, time_range:str)
-            ret.append(PATH_FILE_CAL_EVENT(f"{winning_loc_name}_{date}", winning_loc_name, f"{winning_loc_name} @ {wrapper.date_desc(date)} ({winning_time_name}) with {organizer}!", date, winning_time_name, organizer))
+            ret.append(PATH_FILE_CAL_EVENT(f"{winning_loc_name}_{date}", winning_loc_name, f"{winning_loc_name} @ {wrapper.date_desc(date)} ({winning_time_name}) with {name}!", date, winning_time_name, name))
         
             return ret
 

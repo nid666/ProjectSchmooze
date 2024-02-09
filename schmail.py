@@ -88,7 +88,7 @@ def SEND_EMAIL(Bcc=True, subject="", email_raw="", email_html="", attachments=[]
                                filename=os.path.basename(file_path))
 
     try:
-        print(f"user:'{ADDRESS}'\npass:'{PASSWORD}'\n")
+        #print(f"user:'{ADDRESS}'\npass:'{PASSWORD}'\n")
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(ADDRESS, PASSWORD)
             smtp.send_message(msg)
