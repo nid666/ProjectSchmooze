@@ -6,4 +6,4 @@ streamlit-extras
 extra-streamlit-components
 streamlit-authenticator
 pyyaml
-streamlit-geolocation
+streamlit_js_eval
