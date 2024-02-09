@@ -42,7 +42,7 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Add sender name (sid)
 - [x] add sender company and get location (sid)
 - [ ] change time to be custom string input (sid)
-- [ ] add comment section (dean)
+- [x] add comment section (Sid)
 - [ ] verify if email section is blank before allowing sending of emails (sid)
 - [ ] automatically clear email input once an email is entered (sid)
 - [x] add in forgot password and create account screens (sid)
