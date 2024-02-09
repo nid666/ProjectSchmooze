@@ -12,7 +12,26 @@ import yaml
 from yaml.loader import SafeLoader
 import streamlit_js_eval as js
 
+st.set_page_config(initial_sidebar_state="collapsed")
 
+st.markdown(
+    """
+<style>
+    [data-testid="collapsedControl"] {
+        display: none
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
+def is_valid_12_hour_format(time_str):
+    # Adjust regex to allow a single digit for hours less than 10
+    if re.match(r'^(0?[1-9]|1[0-2]):([0-5][0-9])$', time_str):
+        return True
+    else:
+        return False
 
 
 def get_logged_in_user_email():
@@ -35,18 +54,6 @@ def get_logged_in_user_email():
         # Return None or an appropriate message if the user is not logged in or if the authenticator object is not found
         return None
 
-st.set_page_config(initial_sidebar_state="collapsed")
-
-st.markdown(
-    """
-<style>
-    [data-testid="collapsedControl"] {
-        display: none
-    }
-</style>
-""",
-    unsafe_allow_html=True,
-)
 
 
 #checks if the email given to it is valid or not, returns a boolean
@@ -79,6 +86,54 @@ def mainPage():
     company = st.text_input(label="companyNameEntry", label_visibility="hidden")
     st.subheader("Select Reservation Date")
     selected_date = st.date_input(label="Select Reservation Date", value = datetime.date.today(), label_visibility="hidden")
+
+
+
+
+
+
+
+    if 'current_time' not in st.session_state:
+        st.session_state.current_time = ""
+
+    if 'times' not in st.session_state:
+        st.session_state.times = []
+
+    col1, col2 = st.columns([0.8, 0.2])
+    with col1:
+        inputTime = st.text_input("Enter the time", key = "time input")
+
+
+    
+        if st.button('Add Time'):
+            if is_valid_12_hour_format(inputTime):
+                if inputTime in st.session_state.times:
+                    st.toast('time already added')
+                else:
+                    # Add the new email to the list of emails
+                    st.session_state.times.append(inputTime)
+                    # Clear the current email input
+                    st.session_state.current_time = ""
+                    st.toast("Time Added!")
+            else:
+                st.error('Please enter a valid time.')
+
+    # Update the current email input in the state
+    st.session_state.current_time = inputTime
+    st.write(st.session_state.times)
+    #st.multiselect('Edit Emails',options=st.session_state.times, default = st.session_state.times, key='timings') 
+
+    #This selects AM or PM
+    with col2:
+        st.selectbox(label="amOrpmSelect", options = ['AM', 'PM'], label_visibility="hidden")
+
+
+
+
+
+
+
+
     # Defining the time slots im selecting between, this can be changed to the time picker if we want any time to be selectable
     time_slots = ["09:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", 
                 "12:00 PM - 01:00 PM", "01:00 PM - 02:00 PM", "02:00 PM - 03:00 PM", 
