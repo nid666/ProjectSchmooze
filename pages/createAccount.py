@@ -57,21 +57,14 @@ def getLoginConfig():
 
 
 # Use the correct path for both reading and writing to ensure consistency
-config_path = '../config.yaml'  # Adjust this path as needed
 
-#authenticator = st.session_state['authObject']
+authenticator = st.session_state['authObject']
 
 
 config = getLoginConfig()
 
 st.write(config)
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config['preauthorized']
-)
+
 
 try:
     email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(preauthorization=False)
@@ -84,7 +77,7 @@ try:
 
         st.toast('User Registered Successfully')
 
-    with open(config_path, 'w') as file:
+    with open('pages/config.yaml', 'w') as file:
             yaml.dump(config, file, default_flow_style=False)
     
 except Exception as e:
