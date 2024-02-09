@@ -10,6 +10,9 @@ import events_database as edb
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
+import streamlit_js_eval as js
+
+
 
 def get_logged_in_user_email():
     # Check if the user is authenticated and the authenticator object exists in the session state
@@ -59,13 +62,14 @@ def is_valid_email(email):
 
 def mainPage():
     
-
+    
     cols = st.columns([0.85, 0.15])
     with cols[1]:
         authenticator = st.session_state['authObject']
         authenticator.logout()
 
-    
+    location = js.get_geolocation()
+
     # Title so that it can be centered
     st.markdown("<h1 style='text-align: center;'>Project Schmooze</h1>", unsafe_allow_html=True)
 
@@ -184,8 +188,11 @@ def mainPage():
                 'budget': int(budget),  # Convert to string if necessary
                 'sender': str(st.session_state["email"]),
                 'recipients': [str(e) for e in st.session_state['emails']],
-                'votes': {}
+                'votes': {},
+                'name' : str(st.session_state['name']),
+                'location' : location   # The users location as a json, it will be null if they didn't accept the location thing
             }
+
 
             print(events)
 
