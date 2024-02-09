@@ -57,3 +57,4 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Better data capturing for logged in users
 - [ ] Send forgotten password info in an email to user
 - [ ] Add reset password screen
+- [ ] Add AI integration to reccomendations
