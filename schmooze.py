@@ -66,6 +66,7 @@ authenticator.login()
 if 'authObject' not in st.session_state:
     st.session_state['authObject'] = authenticator
 
+
 def main():
     if st.query_params.get("uuid") == None:
         #Handles logging on

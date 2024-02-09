@@ -8,7 +8,7 @@ import extra_streamlit_components as stx
 import streamlit_authenticator as stauth
 import yaml
 from streamlit_option_menu import option_menu
-
+from yaml.loader import SafeLoader
 
 # Ignore this, it is just page setup boilerplate
 st.set_page_config(
@@ -33,6 +33,9 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 st.markdown("<style> ul {display: none;} </style>", unsafe_allow_html=True)
 
+#Makes sure that the auth object exists by forcing them to go to main page first
+if st.session_state == {}:
+    st.switch_page("schmooze.py")
 
 
 loginOptionMenu = option_menu(None, ["Login", "Create Account", "Forgot Password"], 
