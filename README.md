@@ -40,7 +40,7 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Reminder email one day before vote deadline (dean)
 - [ ] Show final result (dean)
 - [x] Add sender name (sid)
-- [ ] add sender company and location (sid)
+- [x] add sender company and get location (sid)
 - [ ] change time to be custom string input (sid)
 - [ ] add comment section (dean)
 - [ ] verify if email section is blank before allowing sending of emails (sid)
