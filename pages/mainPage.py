@@ -75,7 +75,8 @@ def mainPage():
     st.markdown("<h1 style='text-align: center;'>Project Schmooze</h1>", unsafe_allow_html=True)
 
     # Select a date using streamlit date input
-    
+    st.subheader("Enter Company Name")
+    company = st.text_input(label="companyNameEntry", label_visibility="hidden")
     st.subheader("Select Reservation Date")
     selected_date = st.date_input(label="Select Reservation Date", value = datetime.date.today(), label_visibility="hidden")
     # Defining the time slots im selecting between, this can be changed to the time picker if we want any time to be selectable
@@ -142,6 +143,7 @@ def mainPage():
 
     new_email = st.text_input('Enter email address', value=st.session_state.current_email, key='email_input')
 
+    
     if st.button('Add Email'):
         if is_valid_email(new_email):
             if new_email in st.session_state.emails:
@@ -159,6 +161,9 @@ def mainPage():
     st.session_state.current_email = new_email
 
     st.multiselect('Edit Emails',options=st.session_state.emails, default = st.session_state.emails, key='emails') 
+
+    st.header("Enter a comment for the reservation")
+    comment = st.text_area(label = "commentEntry", label_visibility="hidden")
     st.divider()
 
 
@@ -191,7 +196,8 @@ def mainPage():
                 'recipients': [str(e) for e in st.session_state['emails']],
                 'votes': {},
                 'name' : str(st.session_state['name']),
-                'location' : location   # The users location as a json, it will be null if they didn't accept the location thing
+                'location' : location,   # The users location as a json, it will be null if they didn't accept the location thing
+                'company' : company
             }
 
 
