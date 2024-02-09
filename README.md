@@ -35,18 +35,18 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Hosted Publically with full userflow 
 - [x] Fix any bugs and optimize voting page
 - [x] Double check API progress
-- [ ] Fix bug when hosted
-- [ ] Deadline to cast vote
-- [ ] Reminder email one day before vote deadline 
-- [ ] Show final result
+- [ ] Fix bug when hosted (dean)
+- [ ] Deadline to cast vote (dean)
+- [ ] Reminder email one day before vote deadline (dean)
+- [ ] Show final result (dean)
 - [x] Add sender name (sid)
 - [ ] add sender company and location (sid)
 - [ ] change time to be custom string input (sid)
-- [ ] add comment section
+- [ ] add comment section (dean)
 - [ ] verify if email section is blank before allowing sending of emails (sid)
 - [ ] automatically clear email input once an email is entered (sid)
 - [ ] add in forgot password and create account screens (sid)
-- [ ] fix bugs
+- [ ] fix bugs (dean)
 
 ## Phase 4 ToDo (Post API)
 - Distance radius (tentative)
