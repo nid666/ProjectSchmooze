@@ -39,7 +39,7 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Deadline to cast vote
 - [ ] Reminder email one day before vote deadline 
 - [ ] Show final result
-- [ ] Add sender name (sid)
+- [x] Add sender name (sid)
 - [ ] add sender company and location (sid)
 - [ ] change time to be custom string input (sid)
 - [ ] add comment section
