@@ -1,0 +1,28 @@
+cookie:
+  expiry_days: 30
+  key: g7iyDFDNFoSad8ZSlZvZENkFW7jzAN72WDhtLCiEGDw=
+  name: some_cookie_name
+credentials:
+  usernames:
+    dbaq:
+      email: dnnbaq@gmail.com
+      logged_in: false
+      name: Tommy dbaq
+      password: abc
+    jsmith:
+      email: jsmith@gmail.com
+      logged_in: false
+      name: John Smith
+      password: abc
+    ltyag:
+      email: ltanyag@gmail.com
+      logged_in: false
+      name: Tommy Tanyag
+      password: abc
+    rbriggs:
+      email: rbriggs@gmail.com
+      logged_in: false
+      name: Rebecca Briggs
+      password: def
+preauthorized:
+  emails:

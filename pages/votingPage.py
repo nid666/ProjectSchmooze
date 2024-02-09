@@ -190,61 +190,20 @@ def renderVotingPage():
             edb.event.voting.vote(uuid, vote_result)
 
 
-def renderVotingPage(allow_revote=False):
-    # Retrieve UUID and validate it
-    uuid = st.query_params.get("uuid")
-    event_dict = edb.event.details.unserialize(uuid)
-    if event_dict is None:
-        st.error("Invalid UUID")
-        return
-
-    # Check for existing cookies
-    cookies = cookie_manager.get("results")
-
-    # Initial loading or condition check for revoting
-    if cookies is None or (allow_revote and cookies['votedStatus']):
-        if cookies is None:
-            # Generate a new voting_id for new voters
-            voting_id = edb.generate_UUID()
-            cookies = {
-                "votedStatus": False,
-                "voting_id": voting_id,
-                "uuid": uuid,
-                "selected_location": None,
-                "selected_time": None
-            }
-            # Set initial cookies for new users
-            cookie_manager.set("results", cookies)
-        elif allow_revote:
-            # Load for revoting with existing cookies
-            voting_id = cookies['voting_id']
-        
-        # Common UI elements for voting
-        renderVotingUI(event_dict, uuid, voting_id, cookies, allow_revote)
-    else:
-        st.error("You have already voted. Revoting is not enabled.")
 
 
 
+'''
+
+This is an attempt of optimizing the code
+many of the functions in edb will need to be moved into this file
+
+this is an attempt to fix both login issue bug and the uuid = None bug
+that happens during deployment
 
 
-def renderVotingUI(event_dict, uuid, voting_id, cookies, allow_revote):
-    # Display Header
-    if allow_revote:
-        st.subheader("Change your vote:")
-    else:
-        st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 
-    # Voting logic (locations and times) goes here...
-    # Similar to the shared parts of the original functions
+'''
 
-    # Final Vote Submission
-    if st.button("Cast Final Vote"):
-        # Check for changes in revote or proceed with initial vote submission
-        processFinalVote(cookies, uuid, voting_id)
 
-def processFinalVote(cookies, uuid, voting_id):
-    # Process the final vote here, including checks for revoting and setting cookies
-    pass
 
-renderVotingPage(allow_revote=True)

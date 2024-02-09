@@ -48,7 +48,7 @@ elif loginOptionMenu == "Forgot Password":
     st.switch_page("pages/forgotPassword.py")
 
 def getLoginConfig():
-    with open('config.yaml') as file:
+    with open('pages/config.yaml') as file:
         config = yaml.load(file, Loader=SafeLoader)
     return config
 
@@ -65,6 +65,11 @@ authenticator = stauth.Authenticate(
 authenticator.login()
 if 'authObject' not in st.session_state:
     st.session_state['authObject'] = authenticator
+
+
+
+
+
 
 
 def main():

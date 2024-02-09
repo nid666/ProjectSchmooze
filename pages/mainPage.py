@@ -14,6 +14,7 @@ import streamlit_js_eval as js
 
 
 
+
 def get_logged_in_user_email():
     # Check if the user is authenticated and the authenticator object exists in the session state
     if 'authObject' in st.session_state:
