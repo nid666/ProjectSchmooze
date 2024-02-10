@@ -47,6 +47,7 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] automatically clear email input once an email is entered (sid)
 - [x] add in forgot password and create account screens (sid)
 - [ ] fix bugs (dean)
+- [ ] create and add logo to main pages
 
 ## Phase 4 ToDo (Post API)
 - Distance radius (tentative)
@@ -58,3 +59,4 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Send forgotten password info in an email to user
 - [ ] Add reset password screen
 - [ ] Add AI integration to reccomendations
+- [ ] allow removal of incorrectly entered time slots
