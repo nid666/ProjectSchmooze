@@ -41,7 +41,7 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Show final result (dean)
 - [x] Add sender name (sid)
 - [x] add sender company and get location (sid)
-- [ ] change time to be custom string input (sid)
+- [x] change time to be custom string input (sid)
 - [x] add comment section (Sid)
 - [ ] verify if email section is blank before allowing sending of emails (sid)
 - [ ] automatically clear email input once an email is entered (sid)
