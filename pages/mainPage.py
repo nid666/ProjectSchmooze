@@ -109,6 +109,8 @@ def mainPage():
     st.subheader("Select Reservation Date")
     selected_date = st.date_input(label="Select Reservation Date", value = datetime.date.today(), label_visibility="hidden")
 
+    deadline = st.subheader("Select Deadline for Voting")
+    selected_date = st.date_input(label="Select Deadline Date", value = datetime.date.today(), label_visibility="hidden")
 
 
     if 'current_time' not in st.session_state:
@@ -248,7 +250,8 @@ def mainPage():
                 'name' : str(st.session_state['name']),
                 'location' : location,   # The users location as a json, it will be null if they didn't accept the location thing
                 'company' : company,
-                'comment' : comment
+                'comment' : comment,
+                'deadline': deadline.strftime('%Y-%m-%d'),
             }
 
 
