@@ -226,8 +226,8 @@ def mainPage():
         
         if (len(st.session_state.times) == 0):
             st.error("You must select at least one time slot")
-        #elif is_valid_email(email) == False:
-            #st.error("You must enter a valid email address")
+        elif len(st.session_state['emails']) == 0:
+            st.error("You must enter at least one email to invite")
         else:
             uuid = edb.generate_UUID()
 
