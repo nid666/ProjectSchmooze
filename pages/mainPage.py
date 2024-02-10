@@ -247,7 +247,8 @@ def mainPage():
                 'votes': {},
                 'name' : str(st.session_state['name']),
                 'location' : location,   # The users location as a json, it will be null if they didn't accept the location thing
-                'company' : company
+                'company' : company,
+                'comment' : comment
             }
 
 
