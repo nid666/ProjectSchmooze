@@ -2,11 +2,11 @@ import datetime
 import time
 import streamlit as st
 import re
-import schmail as notify
+import _mail as notify
 import json
 from streamlit_extras.stateful_button import button 
 import extra_streamlit_components as stx
-import events_database as edb
+import database as db
 import streamlit_authenticator as stauth
 import yaml
 from streamlit_option_menu import option_menu
@@ -89,9 +89,9 @@ def main():
     else:
         approval_param = st.query_params.get("apr")
         if approval_param == "get":
-            event_dict = edb.event.details.unserialize(st.query_params.get("uuid"))
             st.session_state['uuid'] = st.query_params.get("uuid") #
-            if edb.event.voting._is_ready_(event_dict["uuid"]) and (config["credentials"]["usernames"][st.session_state["username"]]["email"] == event_dict["sender"]):
+            organizer = db.events.get.organizer_email(st.query_params.get("uuid"))
+            if db.event._is.active(st.query_params.get("uuid")) and (config["credentials"]["usernames"][st.session_state["username"]]["email"] == organizer):
                 with st.spinner("Loading Page..."):
                     time.sleep(1)
                     st.switch_page("pages/aprPage.py")
