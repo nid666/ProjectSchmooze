@@ -1,4 +1,4 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+#from apscheduler.schedulers.background import BackgroundScheduler
 from email.message import EmailMessage
 from yaml.loader import SafeLoader
 from ics import Calendar, Event
@@ -147,7 +147,7 @@ class mail:
         def get_approve(event_id:str)->str:
 
             date = db.events.get.date(event_id)
-            winning_time, winning location = db.votes.winner(event_id)
+            winning_time, winning_location = db.votes.winner(event_id)
 
             return f"[{TAG_COMPANY_NAME}] Add {winning_location} on {wrapper.date_desc(date)} ({winning_time}) to your calendar!"
 
@@ -179,7 +179,7 @@ class mail:
             company = people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
-            winning_time, winning location = db.votes.winner(event_id)
+            winning_time, winning_location = db.votes.winner(event_id)
 
             row1 = "Event Approved"
             row2 = f"{name} from {company} has booked {winning_location} on {wrapper.date_desc(date)} at {winning_time}!"
@@ -194,7 +194,7 @@ class mail:
         def get_request(event_id: str, request_link:str)->str:
 
             comment = db.events.get.comment(event_id)
-            winning_time, winning location = db.votes.winner(event_id)
+            winning_time, winning_location = db.votes.winner(event_id)
             tally = db.votes.tally(event_id)
             len_guests = len(db.events.get.votes(event_id).keys())
 
@@ -261,7 +261,7 @@ class mail:
             company = people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
-            winning_time, winning location = db.votes.winner(event_id)
+            winning_time, winning_location = db.votes.winner(event_id)
 
             html_content = f"""
             <html>
@@ -288,7 +288,7 @@ class mail:
         def get_request(event_id: str, request_link: str) -> str:
 
             comment = db.events.get.comment(event_id)
-            winning_time, winning location = db.votes.winner(event_id)
+            winning_time, winning_location = db.votes.winner(event_id)
             tally = db.votes.tally(event_id)
             len_guests = len(db.events.get.votes(event_id).keys())
 
@@ -502,7 +502,7 @@ class send:
         recipients.append(db.events.get.organizer_email(event_id))
         
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
-
+"""
     @staticmethod
     def reminder():
         return
@@ -514,6 +514,6 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(my_scheduled_function, 'cron', hour=9, minute=0, timezone=pytz.timezone('Your/Timezone'))
 
 scheduler.start()
-
+"""
 
 

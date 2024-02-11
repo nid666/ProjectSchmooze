@@ -50,8 +50,6 @@ def str_to_dict(s: str) -> dict:
 DOMAIN_NAME = "http://schmooze.us.to/"
 PATH_FILE_DB = "tables.db"
 
-if not os.path.exists(PATH_DIR_DATA):
-    os.mkdir(PATH_DIR_DATA)
 if not os.path.exists(PATH_FILE_DB):
     with open(PATH_FILE_DB, 'w') as f:
         pass
@@ -91,7 +89,7 @@ CREATE TABLE IF NOT EXISTS events (
     comment TEXT,
     deadline TEXT NOT NULL,
     budget TEXT,
-    timezone TEXT NOT NULL
+    timezone TEXT NOT NULL,
     times TEXT NOT NULL,
     locations TEXT NOT NULL,
     votes TEXT NOT NULL
@@ -349,14 +347,14 @@ class events:
     class set:
         @staticmethod
         def complete(event_id: str) -> bool:
-            if events.is.active(event_id):
+            if events._is.active(event_id):
                 result = tables.query("UPDATE events SET deadline = 'COMPLETED' WHERE uuid = ?", (event_id,))
                 return result[0] > 0
             return False
 
         @staticmethod
         def cancel(event_id: str) -> bool:
-            if events.is.active(event_id):
+            if events._is.active(event_id):
                 result = tables.query("UPDATE events SET deadline = 'CANCELLED' WHERE uuid = ?", (event_id,))
                 return result[0] > 0
             return False
@@ -416,5 +414,5 @@ class events:
 
 class analysis:
 
-    def averages(date_range="", avg_type="" mode="all", exclude="", *flags=[]):
+    def averages(date_range="", avg_type="", mode="all", exclude="", *flags):
         return
