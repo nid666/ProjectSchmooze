@@ -58,7 +58,7 @@ def GET_CREDENTIALS():
 # ------------------------------  ------------------------------ #
 
 # IMPLEMENT timezone options in events database!
-def PATH_FILE_CAL_EVENT(name: str, location: str, desc: str, date: str, time_range: str, organizer: str, timezone='America/New_York') -> str:
+def PATH_FILE_CAL_EVENT(name: str, location: str, desc: str, date: str, time_range: str, organizer: str, timezone:str) -> str:
     start_time_str, end_time_str = wrapper.time_split(time_range)
     start_time_24hr = wrapper.convert_time_to_24hr(start_time_str)
     end_time_24hr = wrapper.convert_time_to_24hr(end_time_str)
@@ -172,7 +172,7 @@ class mail:
     class raw_email:
 
         @staticmethod
-        def get_approve(event_id: dict)->str:
+        def get_approve(event_id: str)->str:
 
             email = db.events.get.organizer_email(event_id)
             name = people.get.name(email)
@@ -229,7 +229,7 @@ class mail:
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6 + '\n\n' + row7 + '\n\n' + row8 + '\n\n' + row9 + '\n\n' + row10
 
         @staticmethod
-        def get_invite(event: dict, voting_link:str)->str:
+        def get_invite(event_id: str, voting_link:str)->str:
 
             email = db.events.get.organizer_email(event_id)
             name = people.get.name(email)
@@ -254,7 +254,7 @@ class mail:
     class html_email:
 
         @staticmethod
-        def get_approve(event_dict: dict) -> str:
+        def get_approve(event_id: str) -> str:
 
             email = db.events.get.organizer_email(event_id)
             name = people.get.name(email)
@@ -285,7 +285,7 @@ class mail:
             return html_content
 
         @staticmethod
-        def get_request(event_dict: dict, request_link: str) -> str:
+        def get_request(event_id: str, request_link: str) -> str:
 
             comment = db.events.get.comment(event_id)
             winning_time, winning location = db.votes.winner(event_id)
@@ -334,7 +334,7 @@ class mail:
             return html_content
 
         @staticmethod
-        def get_invite(event_dict: dict, voting_link: str) -> str:
+        def get_invite(event_id: str, voting_link: str) -> str:
 
             email = db.events.get.organizer_email(event_id)
             name = people.get.name(email)
@@ -373,7 +373,7 @@ class mail:
     class attachments:
 
         @staticmethod
-        def get_approve(event: dict)->str:
+        def get_approve(event_id: str)->str:
 
             winning_time_obj = wrapper.get_winning_time(votes)
             winning_time_name = winning_time_obj[0]
@@ -389,13 +389,18 @@ class mail:
             return ret
 
         @staticmethod
-        def get_request(event_dict: dict)->list:
+        def get_request(event_id: str)->list:
             
             return []
 
         @staticmethod
-        def get_invite(event_dict: dict)->list:
+        def get_invite(event_id: str)->list:
             
+            return []
+
+        @staticmethod
+        def get_reminder(event_id:str)->list:
+
             return []
 
 # ------------------------------  ------------------------------ #
@@ -463,10 +468,10 @@ class send:
     @staticmethod
     def approve(event_id:str, BCC=True):
         
-        subject = mail.subject.get_approve(event_dict)
-        email_raw = mail.raw_email.get_approve(event_dict)
-        email_html = mail.html_email.get_approve(event_dict)
-        email_attachments = mail.attachments.get_approve(event_dict)
+        subject = mail.subject.get_approve(event_id)
+        email_raw = mail.raw_email.get_approve(event_id)
+        email_html = mail.html_email.get_approve(event_id)
+        email_attachments = mail.attachments.get_approve(event_id)
 
         recipients = list(db.events.get.votes(event_id).keys()).copy()
         recipients.append(db.events.get.organizer_email(event_id))
@@ -476,10 +481,10 @@ class send:
     @staticmethod
     def request(event_id:str, request_link:str, BCC=True):
         
-        subject = mail.subject.get_request(event_dict)
-        email_raw = mail.raw_email.get_request(event_dict, request_link)
-        email_html = mail.html_email.get_request(event_dict, request_link)
-        email_attachments = mail.attachments.get_request(event_dict)
+        subject = mail.subject.get_request(event_id)
+        email_raw = mail.raw_email.get_request(event_id, request_link)
+        email_html = mail.html_email.get_request(event_id, request_link)
+        email_attachments = mail.attachments.get_request(event_id)
 
         recipients = [db.events.get.organizer_email(event_id)]
 
@@ -488,10 +493,10 @@ class send:
     @staticmethod
     def invite(event_id:str, voting_link:str, BCC=True):
         
-        subject = mail.subject.get_invite(event_dict)
-        email_raw = mail.raw_email.get_invite(event_dict, voting_link)
-        email_html = mail.html_email.get_invite(event_dict, voting_link)
-        email_attachments = mail.attachments.get_invite(event_dict)
+        subject = mail.subject.get_invite(event_id)
+        email_raw = mail.raw_email.get_invite(event_id, voting_link)
+        email_html = mail.html_email.get_invite(event_id, voting_link)
+        email_attachments = mail.attachments.get_invite(event_id)
 
         recipients = list(db.events.get.votes(event_id).keys()).copy()
         recipients.append(db.events.get.organizer_email(event_id))

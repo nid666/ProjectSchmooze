@@ -2,7 +2,6 @@ import datetime
 import time
 import streamlit as st
 import re
-import _mail as notify
 import json
 from streamlit_extras.stateful_button import button 
 import extra_streamlit_components as stx

@@ -4,6 +4,7 @@ import json
 import yaml
 import datetime
 import sqlite3
+import _mail as sender
 from yaml.loader import SafeLoader
 
 # ------------------------------  ------------------------------ #
@@ -46,6 +47,7 @@ def str_to_dict(s: str) -> dict:
 
 # ------------------------------  ------------------------------ #
 
+DOMAIN_NAME = "http://schmooze.us.to/"
 PATH_FILE_DB = "tables.db"
 
 if not os.path.exists(PATH_DIR_DATA):
@@ -89,6 +91,7 @@ CREATE TABLE IF NOT EXISTS events (
     comment TEXT,
     deadline TEXT NOT NULL,
     budget TEXT,
+    timezone TEXT NOT NULL
     times TEXT NOT NULL,
     locations TEXT NOT NULL,
     votes TEXT NOT NULL
@@ -233,6 +236,18 @@ class votes:
         if not events.exists(event_id): return False
         if voting_id == "": return False
         result = tables.query("INSERT INTO voting (event_id, voting_id, chosen_location, chosen_time) VALUES (?, ?, ?, ?)", (event_id, voting_id, chosen_location, chosen_time))
+
+        max_votes_count = len(events.get.votes(event_id).keys())
+        maj_votes_count = (max_votes_count/2)+1
+        tally = votes.tally(event_id)
+        w_time, w_location = votes.winner(event_id)
+
+        maj_time = (tally['times'][w_time] >= maj_votes_count)
+        maj_location = (tally['locations'][w_location] >= maj_votes_count)
+        if maj_time and maj_location:
+            sender.send.request(event_id, f"{DOMAIN_NAME}?uuid={uuid}&apr=get", True)
+            events.set.complete(event_id)
+    
         return result[0] > 0
 
     @staticmethod
@@ -260,9 +275,7 @@ class votes:
                 time_counts[chosen_time] += 1
             else:
                 time_counts[chosen_time] = 0
-            
 
-        # Sort the dictionaries based on their values in descending order
         sorted_locations = {k: v for k, v in sorted(location_counts.items(), key=lambda item: item[1], reverse=True)}
         sorted_times = {k: v for k, v in sorted(time_counts.items(), key=lambda item: item[1], reverse=True)}
 
@@ -272,8 +285,13 @@ class votes:
         }
 
     @staticmethod
-    def winner(event_id:str = "")->tuple:
-        
+    def winner(event_votes: dict) -> tuple:
+        locations = event_votes.get('locations', {})
+        times = event_votes.get('times', {})
+
+        winning_location = max(locations, key=locations.get, default=None)
+        winning_time = max(times, key=times.get, default=None)
+        return (winning_time, winning_location)
     
 class events:
 
@@ -282,16 +300,17 @@ class events:
         return tables.query("SELECT 1 FROM events WHERE uuid = ?", (event_id,), "one") != ()
 
     @staticmethod
-    def set(event_id: str, organizer_email: str, organizer_loc: str, date: str, deadline: str, budget: str, times: list, locations: list, votes: dict) -> bool:
+    def create(event_id: str, organizer_email: str, organizer_loc: str, date: str, deadline: str, budget: str, timezone:str, times: list, locations: list, votes: dict) -> bool:
 
         if events.exists(event_id): return False
-        
+
+        location_str = dict_to_str(organizer_loc)
         times_str = list_to_str(times)
         locations_str = list_to_str(locations)
         votes_str = dict_to_str(votes)
 
-        result = tables.query("INSERT INTO events (uuid, organizer, organizer_loc, date, deadline, budget, times, locations, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                                (event_id, organizer_email, organizer_loc, date, deadline, budget, times_str, locations_str, votes_str))
+        result = tables.query("INSERT INTO events (uuid, organizer, organizer_loc, date, deadline, budget, timezone, times, locations, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                                (event_id, organizer_email, location_str, date, deadline, budget, timezone, times_str, locations_str, votes_str))
         
         return result[0] > 0
 
@@ -373,6 +392,11 @@ class events:
         @staticmethod
         def budget(event_id: str) -> str:
             result = tables.query("SELECT budget FROM events WHERE uuid = ?", (event_id,), "one")
+            return result[0][0] if result else None
+
+        @staticmethod
+        def timezone(event_id: str) -> str:
+            result = tables.query("SELECT timezone FROM events WHERE uuid = ?", (event_id,), "one")
             return result[0][0] if result else None
 
         @staticmethod

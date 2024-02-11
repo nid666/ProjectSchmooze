@@ -2,11 +2,11 @@ import datetime
 import time
 import streamlit as st
 import re
-import schmail as notify
+import _mail as notify
 import json
 from streamlit_extras.stateful_button import button 
 import extra_streamlit_components as stx
-import events_database as edb
+import database as db
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
@@ -231,7 +231,7 @@ def mainPage():
         elif len(st.session_state['emails']) == 0:
             st.error("You must enter at least one email to invite")
         else:
-            uuid = edb.generate_UUID()
+            uuid = db.UUID()
 
             #location_images = ["placeholder_link.com" for _ in range(len(st.session_state.get(locations)))]
             #locations_dict = {key: value for key, value in zip(st.session_state.get(locations), location_images)}
@@ -250,15 +250,25 @@ def mainPage():
                 'name' : str(st.session_state['name']),
                 'location' : location,   # The users location as a json, it will be null if they didn't accept the location thing
                 'company' : company,
+                'timezone': 'America/New_York',
                 'comment' : comment,
                 'deadline': deadline.strftime('%Y-%m-%d'),
             }
 
 
             print(events)
-
-            edb.event.details.serialize(events)
-            
+            db.events.create(
+                event_id=events['uuid'],
+                organizer_email=events['sender'],
+                organizer_loc=events['location'],
+                date=events['date'],
+                deadline=events['deadline'],
+                budget=str(events['budget']),
+                timezone=events['timezone'],
+                times=events['times'],
+                locations=events['locations'],
+                votes=events['votes']
+            )         
             st.write(events)
             
             st.toast("Invite sent successfully!")

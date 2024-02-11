@@ -1,6 +1,6 @@
 import streamlit as st
-import events_database as edb
-import schmail as notify
+import database as db
+import _mail as notify
 
 # Set up the Streamlit page configuration
 st.set_page_config(page_title="Approve Page", initial_sidebar_state="collapsed")

@@ -5,13 +5,9 @@ import re
 import json
 from streamlit_extras.stateful_button import button 
 import extra_streamlit_components as stx
-import events_database as edb
+import database as db
 import streamlit_authenticator as stauth
 import yaml
-        
-
-
-
 
 #might need to include st.cache_data() here if there are performance issues
 cookie_manager = stx.CookieManager(key = "cookieManagerKey")
@@ -21,14 +17,13 @@ def renderRevotePage():
     cookies = cookie_manager.get("results")
 
     uuid = st.query_params.get("uuid")
-    event_dict = edb.event.details.unserialize(uuid)
-    if event_dict == None:
+    if db.events.exists(uuid):
         st.error("Invalid UUID")
         return
     
     # getting the time and location values
-    locations = event_dict["locations"]
-    times = event_dict["times"]
+    locations = db.events.get.locations(uuid)
+    times = db.events.get.times(uuid)
 
     st.subheader("Change your vote: ")
     # Location Voting
@@ -75,9 +70,11 @@ def renderRevotePage():
                     "selected_location": st.session_state['selected_location'],
                     "selected_time": st.session_state['selected_time']
                 }
+
+                
                 cookie_manager.set("results", vote_result)
 
-                edb.event.voting.vote(uuid, vote_result)
+                db.votes.cast(vote_result['uuid'],vote_result['voting_id'],vote_result['selected_location'],vote_result['selected_time'])
 
     st.write('voted')
 
@@ -85,8 +82,7 @@ def renderVotingPage():
     
     uuid = st.query_params.get("uuid")
 
-    event_dict = edb.event.details.unserialize(uuid)
-    if event_dict == None:
+    if db.events.exists(uuid):
         st.error("Invalid UUID")
         return
     
@@ -98,7 +94,7 @@ def renderVotingPage():
     with st.spinner("Loading Page..."):
         time.sleep(1)
 
-    voting_id = edb.generate_UUID()
+    voting_id = db.UUID()
     st.write(voting_id)
     # If the cookies do not exist, create temp cookies
     if cookies == None:
@@ -132,7 +128,7 @@ def renderVotingPage():
             st.session_state['selected_time'] = None
 
 
-        locations = event_dict["locations"]
+        locations = db.events.get.locations(uuid)
         loc_cols = st.columns(len(locations))
 
         #Generates the buttons for locations, with c being the columns and l being the location
@@ -147,7 +143,7 @@ def renderVotingPage():
 
         st.subheader("Select Reservation Time")
 
-        times = event_dict["times"]
+        times = db.events.get.times(uuid)
         tim_cols = st.columns(len(times))
 
         # Generates the buttons for times, with t being the columns and l being the time
@@ -187,7 +183,7 @@ def renderVotingPage():
             st.json(vote_json)
 
             # DATABASE: saved to pickle
-            edb.event.voting.vote(uuid, vote_result)
+            db.votes.cast(uuid,vote_result['voting_id'],vote_result['selected_location'],vote_result['selected_time'])
 
 
 
