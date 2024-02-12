@@ -246,7 +246,7 @@ def mainPage():
                 'budget': int(budget),  # Convert to string if necessary
                 'sender': str(st.session_state["email"]),
                 'recipients': [str(e) for e in st.session_state['emails']],
-                'votes': {},
+                'votes': {e: db.UUID() for e in st.session_state['emails']},
                 'name' : str(st.session_state['name']),
                 'location' : location,   # The users location as a json, it will be null if they didn't accept the location thing
                 'company' : company,
@@ -268,12 +268,18 @@ def mainPage():
                 times=events['times'],
                 locations=events['locations'],
                 votes=events['votes']
-            )         
+            )
+            for x in events['votes'].keys):
+                val = events['votes'][x]
+                votes.cast(uuid, val, "", "")
+
+            votes.cast(uuid,uuid,"","")
+                
             st.write(events)
             
             st.toast("Invite sent successfully!")
 
-            notify.send.invite(uuid, f"http://schmooze.us.to/?uuid={uuid}", True) # temporary placeholder link for the voting page
+            notify.send.invite(uuid, f"http://schmooze.us.to/", True) # temporary placeholder link for the voting page
 
 
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:

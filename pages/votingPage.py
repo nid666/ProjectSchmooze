@@ -66,11 +66,10 @@ def renderRevotePage():
                 vote_result = {
                     "votedStatus": True,
                     "uuid": uuid,
-                    "voting_id": voting_id,
+                    "voting_id": st.query_params.get("vid"),
                     "selected_location": st.session_state['selected_location'],
                     "selected_time": st.session_state['selected_time']
                 }
-
                 
                 cookie_manager.set("results", vote_result)
 
@@ -167,7 +166,7 @@ def renderVotingPage():
             # Capture the votes and uuid in a dictionary
             vote_result = {
                 "votedStatus": True,
-                "voting_id": voting_id,
+                "voting_id": st.query_params.get("vid"),
                 "uuid": uuid,
                 "selected_location": st.session_state['selected_location'],
                 "selected_time": st.session_state['selected_time']

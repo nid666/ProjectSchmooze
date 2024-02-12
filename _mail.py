@@ -491,17 +491,30 @@ class send:
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
 
     @staticmethod
-    def invite(event_id:str, voting_link:str, BCC=True):
+    def invite(event_id:str, voting_domain:str, BCC=True):
         
         subject = mail.subject.get_invite(event_id)
-        email_raw = mail.raw_email.get_invite(event_id, voting_link)
-        email_html = mail.html_email.get_invite(event_id, voting_link)
         email_attachments = mail.attachments.get_invite(event_id)
 
         recipients = list(db.events.get.votes(event_id).keys()).copy()
         recipients.append(db.events.get.organizer_email(event_id))
+
+        #send for atendes
+        ret = True
+        for attendee in recipients:
+            vid = db.events.get.votes(event_id)[attendee]
+            website = os.path.join(voting_domain, f"?uuid={event_id}&vid={vid}")
+            email_raw = mail.raw_email.get_invite(event_id, website)
+            email_html = mail.html_email.get_invite(event_id, website)
+            ret = ret and (SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=attendee))
+
+        #send for organizer
+        website = os.path.join(voting_domain, f"?uuid={event_id}&vid={event_id}")
+        email_raw = mail.raw_email.get_invite(event_id, website)
+        email_html = mail.html_email.get_invite(event_id, website)
+        ret = ret and (SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=db.events.get.organizer_email(event_id)))
         
-        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
+        return ret 
 """
     @staticmethod
     def reminder():

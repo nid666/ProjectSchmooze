@@ -94,8 +94,16 @@ def main():
                 with st.spinner("Loading Page..."):
                     time.sleep(1)
                     st.switch_page("pages/aprPage.py")
+        elif events._is.attendee(st.query_params.get("uuid") != None and st.query_params.get("vid")) != None:
+            event_id = st.query_params.get("uuid")
+            current_email = config["credentials"]["usernames"][st.session_state["username"]]["email"]            
+            is_owner = (current_email == db.events.get.organizer_email(event_id))
+            is_invited = db.events._is.attendee(uuid, st.query_params.get("vid"))
+            if is_owner or is_invited:
+                st.switch_page("pages/votingPage.py")
         else:
-            st.switch_page("pages/votingPage.py")
+            st.switch_page("pages/createAccount.py")
+                
 
 
 main()

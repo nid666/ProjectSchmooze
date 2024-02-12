@@ -313,6 +313,12 @@ class events:
         return result[0] > 0
 
     class _is:
+
+        @staticmethod
+        def attendee(eid:str, vid:str)->bool:
+            in_votes_dict = vid in events.get.votes(eid).values()
+            return events.exists(eid) and in_votes_dict
+        
         @staticmethod
         def complete(event_id: str) -> bool:
             result = tables.query("SELECT deadline FROM events WHERE uuid = ?", (event_id,), "one")
