@@ -7,6 +7,7 @@ import database as db
 import mimetypes
 import smtplib
 import arrow
+import sched
 import pytz
 import yaml
 import json
@@ -515,18 +516,7 @@ class send:
         ret = ret and (SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=db.events.get.organizer_email(event_id)))
         
         return ret 
-"""
+
     @staticmethod
     def reminder():
         return
-
-def my_scheduled_function():
-    print("Function is called")
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(my_scheduled_function, 'cron', hour=9, minute=0, timezone=pytz.timezone('Your/Timezone'))
-
-scheduler.start()
-"""
-
-
