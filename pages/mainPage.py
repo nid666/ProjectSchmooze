@@ -1,5 +1,4 @@
 import datetime
-fr
 import time
 import streamlit as st
 import re
