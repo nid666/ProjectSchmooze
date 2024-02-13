@@ -1,4 +1,5 @@
 import datetime
+fr
 import time
 import streamlit as st
 import re
@@ -195,7 +196,6 @@ def mainPage():
 
     new_email = st.text_input('Enter email address', value=st.session_state.current_email, key='email_input')
 
-    
     if st.button('Add Email'):
         if is_valid_email(new_email):
             if new_email in st.session_state.emails:
@@ -269,7 +269,7 @@ def mainPage():
                 locations=events['locations'],
                 votes=events['votes']
             )
-            for x in events['votes'].keys):
+            for x in events['votes'].keys():
                 val = events['votes'][x]
                 votes.cast(uuid, val, "", "")
 
