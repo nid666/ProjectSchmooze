@@ -109,8 +109,8 @@ def mainPage():
     st.subheader("Select Reservation Date")
     selected_date = st.date_input(label="Select Reservation Date", value = datetime.date.today(), label_visibility="hidden")
 
-    deadline = st.subheader("Select Deadline for Voting")
-    selected_date = st.date_input(label="Select Deadline Date", value = datetime.date.today(), label_visibility="hidden")
+    st.subheader("Select Deadline for Voting")
+    deadline = st.date_input(label="Select Deadline Date", value = datetime.date.today(), label_visibility="hidden")
 
 
     if 'current_time' not in st.session_state:
@@ -257,7 +257,7 @@ def mainPage():
                 'company' : company,
                 'timezone': 'America/New_York',
                 'comment' : comment,
-                'deadline': deadline #deadline.strftime('%Y-%m-%d')
+                'deadline': deadline.strftime('%Y-%m-%d') #deadline.strftime('%Y-%m-%d')
             }
 
 
