@@ -243,8 +243,8 @@ class votes:
         maj_time = (tally['times'][w_time] >= maj_votes_count)
         maj_location = (tally['locations'][w_location] >= maj_votes_count)
         if maj_time and maj_location:
-            sender.send.request(event_id, f"{DOMAIN_NAME}?uuid={uuid}&apr=get", True)
             events.set.complete(event_id)
+            sender.send.request(event_id, f"{DOMAIN_NAME}?uuid={uuid}&apr=get", True)
     
         return result[0] > 0
 

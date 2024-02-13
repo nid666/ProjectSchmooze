@@ -3,6 +3,7 @@ from email.message import EmailMessage
 from yaml.loader import SafeLoader
 from ics import Calendar, Event
 from datetime import datetime
+from datetime import timedelta
 import database as db
 import mimetypes
 import smtplib
@@ -169,6 +170,16 @@ class mail:
             date = db.events.get.date(event_id)
 
             return f"[{TAG_COMPANY_NAME}] {name} from {company} sent an invitation on {wrapper.date_desc(date)}!"
+
+        @staticmethod
+        def get_reminder(event_id: str)->str:
+
+            email = db.events.get.organizer_email(event_id)
+            name = people.get.name(email)
+            company = people.get.company(email)
+            date = db.events.get.date(event_id)
+
+            return f"[{TAG_COMPANY_NAME}] A reminder to vote for ({company}) {name}'s event on {wrapper.date_desc(date)}!"
     
     class raw_email:
 
@@ -243,6 +254,32 @@ class mail:
             row2 = f"{name} from {company} is inviting you to an event on {wrapper.date_desc(date)}!"
             row3 = f"'{comment}'"
             row4 = f"Vote Now - {voting_link}"
+            row5 = "Times:"
+            row6 = '\n'.join(f"{t}" for t in tally["times"].keys())
+            row7 = "Locations:"
+            row8 = '\n'.join(f"{l}" for l in tally["locations"].keys())
+            row9 = "Attendees:"
+            row10 = wrapper.guests_list(event_id)
+            
+            return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6 + '\n\n' + row7 + '\n\n' + row8 + '\n\n' + row9 + '\n\n' + row10
+
+        @staticmethod
+        def get_reminder(event_id: str, voting_link:str)->str:
+
+            email = db.events.get.organizer_email(event_id)
+            name = people.get.name(email)
+            company = people.get.company(email)
+            date = db.events.get.date(event_id)
+            comment = db.events.get.comment(event_id)
+            tally = db.votes.tally(event_id)
+
+            tomorrow = today + timedelta(days=1)
+            formatted_tomorrow = tomorrow.strftime('%Y-%m-%d')
+
+            row1 = f"LAST DAY TO VOTE: {formatted_tomorrow}"
+            row2 = f"{name} from {company} is inviting you to an event on {wrapper.date_desc(date)}!"
+            row3 = f"'{comment}'"
+            row4 = f"Votes Close Tomorrow - {voting_link}"
             row5 = "Times:"
             row6 = '\n'.join(f"{t}" for t in tally["times"].keys())
             row7 = "Locations:"
@@ -371,6 +408,46 @@ class mail:
             """
             return html_content
 
+        @staticmethod
+        def get_reminder(event_id: str, voting_link: str) -> str:
+
+            email = db.events.get.organizer_email(event_id)
+            name = people.get.name(email)
+            company = people.get.company(email)
+            date = db.events.get.date(event_id)
+            comment = db.events.get.comment(event_id)
+            tally = db.votes.tally(event_id)
+
+            tomorrow = today + timedelta(days=1)
+            formatted_tomorrow = tomorrow.strftime('%Y-%m-%d')
+
+            times = '\n'.join(f"<p style='font-size: 11px; color: #555;'>{t}</p>" for t in tally["times"].keys())
+            locations = '\n'.join(f"<p style='font-size: 11px; color: #555;'>{l}</p>" for l in tally["locations"].keys())
+
+            html_content = f"""
+            <html>
+                <head></head>
+                <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
+                    <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h2 style="color: #ff9800; text-align: center;">LAST DAY TO VOTE: <strong>{formatted_tomorrow}</strong></h2>
+                        <p style="font-size: 16px; color: #555; text-align: center;">{name} from {company} is inviting you to an event on <strong>{wrapper.date_desc(date)}</strong>!</p>
+                        <p style="font-size: 14px; color: #555; text-align: center;">'{comment}'</p>
+                        <p style="text-align: center; margin-top: 25px;">
+                            <a href="{voting_link}" style="background-color: #ff9800; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Votes Close Tomorrow</a>
+                        </p>
+                        <div style="margin: 30px 0; border-top: 2px solid #ccc;"></div>
+                        <h3 style="color: #333;"><strong>Times:</strong></h3>
+                        {times}
+                        <h3 style="color: #333;"><strong>Locations:</strong></h3>
+                        {locations}
+                        <h3 style="color: #333;">Attendees:</h3>
+                        {wrapper.guests_list(event_id, True)}
+                    </div>
+                </body>
+            </html>
+            """
+            return html_content
+
     class attachments:
 
         @staticmethod
@@ -401,7 +478,6 @@ class mail:
 
         @staticmethod
         def get_reminder(event_id:str)->list:
-
             return []
 
 # ------------------------------  ------------------------------ #
@@ -519,4 +595,13 @@ class send:
 
     @staticmethod
     def reminder():
-        return
+        
+        subject = mail.subject.get_reminder(event_id)
+        email_raw = mail.raw_email.get_reminder(event_id, request_link)
+        email_html = mail.html_email.get_reminder(event_id, request_link)
+        email_attachments = mail.attachments.get_reminder(event_id)
+
+        recipients = db.events.get.votes(event_id).keys().copy()
+        recipients = recipients.append(event_id)
+
+        return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
