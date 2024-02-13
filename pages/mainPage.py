@@ -119,34 +119,40 @@ def mainPage():
     if 'times' not in st.session_state:
         st.session_state.times = []
 
-    #This is just to put the buttons next to each other in the form
-    col1, col2 = st.columns([0.8, 0.2])
+    col1_start, col2_start = st.columns([0.8, 0.2])
 
-    #This selects AM or PM
-    with col2:
-        amOrPm = st.selectbox(label="amOrpmSelect", options = ['AM', 'PM'], label_visibility="hidden")
-    
+    # Start Time Selection
+    with col2_start:
+        amOrPm_start = st.selectbox("AM or PM", options=['AM', 'PM'], key='amOrPm_start', label_visibility="hidden")
 
-    with col1:
-        inputTime = st.text_input("Enter the time", key = "time input")
+    with col1_start:
+        inputTime_start = st.text_input("Enter the start time", key="time_input_start")
 
+    col1_end, col2_end = st.columns([0.8, 0.2])
 
-        if st.button('Add Time'):
-            if is_valid_12_hour_format(inputTime) and len(st.session_state.times) < 3:
-                if convert_to_24_hour_format(inputTime, amOrPm) in st.session_state.times:
-                    st.toast('time already added')
-                else:
-                    # Add the new email to the list of emails
-                    st.session_state.times.append(convert_to_24_hour_format(inputTime, amOrPm))
-                    # Clear the current email input
-                    st.session_state.current_time = ""
-                    st.toast("Time Added!")
-            elif len(st.session_state.times) == 3:
-                st.toast("Max time slots reached")
+    # End Time Selection
+    with col2_end:
+        amOrPm_end = st.selectbox("AM or PM", options=['AM', 'PM'], key='amOrPm_end', label_visibility="hidden")
+
+    with col1_end:
+        inputTime_end = st.text_input("Enter the end time", key="time_input_end")
+
+    if st.button('Add Time'):
+        # Validate and add start time
+        if is_valid_12_hour_format(inputTime_start) and is_valid_12_hour_format(inputTime_end) and len(st.session_state.times) < 3:
+            start_time_24 = convert_to_24_hour_format(inputTime_start, amOrPm_start)
+            end_time_24 = convert_to_24_hour_format(inputTime_end, amOrPm_end)
+            time_slot = (start_time_24, end_time_24)
+            
+            if time_slot in st.session_state.times:
+                st.toast('Time slot already added')
             else:
-                st.error('Please enter a valid time.')
-    # Update the current email input in the state
-    st.session_state.current_time = inputTime
+                st.session_state.times.append(time_slot)
+                st.toast("Time slot Added!")
+        elif len(st.session_state.times) == 3:
+            st.toast("Max time slots reached")
+        else:
+            st.error('Please enter valid times.')
 
     st.divider()
     # Allowing to choose the places you want to go
@@ -251,7 +257,7 @@ def mainPage():
                 'company' : company,
                 'timezone': 'America/New_York',
                 'comment' : comment,
-                'deadline': deadline.strftime('%Y-%m-%d'),
+                'deadline': deadline #deadline.strftime('%Y-%m-%d')
             }
 
 
@@ -270,9 +276,9 @@ def mainPage():
             )
             for x in events['votes'].keys():
                 val = events['votes'][x]
-                votes.cast(uuid, val, "", "")
+                db.votes.cast(uuid, val, "", "")
 
-            votes.cast(uuid,uuid,"","")
+            db.votes.cast(uuid,uuid,"","")
                 
             st.write(events)
             
