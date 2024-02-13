@@ -13,7 +13,7 @@ def UUID() -> str:
     return str(uuid.uuid4())
 
 def YAML() -> dict:
-    with open('config.yaml') as file:
+    with open('pages/config.yaml') as file:
         config = yaml.load(file, Loader=SafeLoader)
     return config
 
@@ -250,8 +250,7 @@ class votes:
 
     @staticmethod
     def tally(event_id: str = "") -> dict:
-        if not events.exists(event_id):
-            return False
+        if not events.exists(event_id): {}
         rows = tables.query("SELECT chosen_location, chosen_time FROM voting WHERE event_id = ?", (event_id,))
 
         location_counts = {}
@@ -283,13 +282,9 @@ class votes:
         }
 
     @staticmethod
-    def winner(event_votes: dict) -> tuple:
-        locations = event_votes.get('locations', {})
-        times = event_votes.get('times', {})
-
-        winning_location = max(locations, key=locations.get, default=None)
-        winning_time = max(times, key=times.get, default=None)
-        return (winning_time, winning_location)
+    def winner(event_id: str) -> tuple:
+        voting_dict = votes.tally(event_id)
+        return (list(voting_dict['times'].keys())[0], list(voting_dict['locations'].keys())[0])
     
 class events:
 
@@ -300,7 +295,7 @@ class events:
     @staticmethod
     def create(event_id: str, organizer_email: str, organizer_loc: str, date: str, deadline: str, budget: str, timezone:str, times: list, locations: list, votes: dict) -> bool:
 
-        if events.exists(event_id): return False
+        #if events.exists(event_id): return False
 
         location_str = dict_to_str(organizer_loc)
         times_str = list_to_str(times)
@@ -422,3 +417,5 @@ class analysis:
 
     def averages(date_range="", avg_type="", mode="all", exclude="", *flags):
         return
+
+people.sync()

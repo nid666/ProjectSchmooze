@@ -86,7 +86,7 @@ class wrapper:
     @staticmethod
     def attendees_list(event_id:str, HTML=False):
         organizer_email = db.events.get.organizer_email(event_id)
-        guests = list(db.events.get.votes(event_id).keys()).copy
+        guests = list(db.events.get.votes(event_id).keys())
         guests.insert(0, organizer_email)
         ret = ""
         for g in guests:
@@ -94,7 +94,7 @@ class wrapper:
             has_name = False
             if db.people.exists.email(g):
                 name = db.people.get.name(g)
-                if name != "":
+                if name != "" and name != None:
                     insert += name
                     has_name = True
                 company = db.people.get.company(g)
@@ -156,7 +156,7 @@ class mail:
         @staticmethod
         def get_request(event_id: str)->str:
             
-            date = event['date']
+            date = db.events.get.date(event_id)
             winning_location = db.votes.winner(event_id)[1]
 
             return f"[{TAG_COMPANY_NAME}] {winning_location} on {wrapper.date_desc(date)} needs approval!"
@@ -165,8 +165,8 @@ class mail:
         def get_invite(event_id: str)->str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
 
             return f"[{TAG_COMPANY_NAME}] {name} from {company} sent an invitation on {wrapper.date_desc(date)}!"
@@ -175,8 +175,8 @@ class mail:
         def get_reminder(event_id: str)->str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
 
             return f"[{TAG_COMPANY_NAME}] A reminder to vote for ({company}) {name}'s event on {wrapper.date_desc(date)}!"
@@ -187,8 +187,8 @@ class mail:
         def get_approve(event_id: str)->str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             winning_time, winning_location = db.votes.winner(event_id)
@@ -236,7 +236,7 @@ class mail:
             row7 = "Locations:"
             row8 = locations
             row9 = "Attendees:"
-            row10 = wrapper.guests_list(event_id, False)
+            row10 = wrapper.attendees_list(event_id, False)
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6 + '\n\n' + row7 + '\n\n' + row8 + '\n\n' + row9 + '\n\n' + row10
 
@@ -244,8 +244,8 @@ class mail:
         def get_invite(event_id: str, voting_link:str)->str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -259,7 +259,7 @@ class mail:
             row7 = "Locations:"
             row8 = '\n'.join(f"{l}" for l in tally["locations"].keys())
             row9 = "Attendees:"
-            row10 = wrapper.guests_list(event_id)
+            row10 = wrapper.attendees_list(event_id)
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6 + '\n\n' + row7 + '\n\n' + row8 + '\n\n' + row9 + '\n\n' + row10
 
@@ -267,8 +267,8 @@ class mail:
         def get_reminder(event_id: str, voting_link:str)->str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -285,7 +285,7 @@ class mail:
             row7 = "Locations:"
             row8 = '\n'.join(f"{l}" for l in tally["locations"].keys())
             row9 = "Attendees:"
-            row10 = wrapper.guests_list(event_id)
+            row10 = wrapper.attendees_list(event_id)
             
             return row1 + '\n\n' + row2 + '\n\n' + row3 + '\n\n' + row4 + '\n\n' + row5 + '\n\n' + row6 + '\n\n' + row7 + '\n\n' + row8 + '\n\n' + row9 + '\n\n' + row10
         
@@ -295,8 +295,8 @@ class mail:
         def get_approve(event_id: str) -> str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             winning_time, winning_location = db.votes.winner(event_id)
@@ -315,7 +315,7 @@ class mail:
                             <a href="#" style="background-color: #4CAF50; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Add {winning_location} to your calendar</a>
                         </p>
                         <h3 style="color: #333;">Attendees:</h3>
-                        {wrapper.guests_list(event_id, True)}
+                        {wrapper.attendees_list(event_id, True)}
                     </div>
                 </body>
             </html>
@@ -364,7 +364,7 @@ class mail:
                         <h3 style="color: #333;">Locations:</h3>
                         {locations}
                         <h3 style="color: #333;">Attendees:</h3>
-                        {wrapper.guests_list(event_id, True)}
+                        {wrapper.attendees_list(event_id, True)}
                     </div>
                 </body>
             </html>
@@ -375,8 +375,8 @@ class mail:
         def get_invite(event_id: str, voting_link: str) -> str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -401,7 +401,7 @@ class mail:
                         <h3 style="color: #333;"><strong>Locations:</strong></h3>
                         {locations}
                         <h3 style="color: #333;">Attendees:</h3>
-                        {wrapper.guests_list(event_id, True)}
+                        {wrapper.attendees_list(event_id, True)}
                     </div>
                 </body>
             </html>
@@ -412,8 +412,8 @@ class mail:
         def get_reminder(event_id: str, voting_link: str) -> str:
 
             email = db.events.get.organizer_email(event_id)
-            name = people.get.name(email)
-            company = people.get.company(email)
+            name = db.people.get.name(email)
+            company = db.people.get.company(email)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -441,7 +441,7 @@ class mail:
                         <h3 style="color: #333;"><strong>Locations:</strong></h3>
                         {locations}
                         <h3 style="color: #333;">Attendees:</h3>
-                        {wrapper.guests_list(event_id, True)}
+                        {wrapper.attendees_list(event_id, True)}
                     </div>
                 </body>
             </html>
@@ -453,16 +453,13 @@ class mail:
         @staticmethod
         def get_approve(event_id: str)->str:
 
-            winning_time_obj = wrapper.get_winning_time(votes)
-            winning_time_name = winning_time_obj[0]
-            winning_time_count = winning_time_obj[1]
-
-            winning_loc_obj = wrapper.get_winning_location(votes)
-            winning_loc_name = winning_loc_obj[0]
-            winning_loc_count = winning_loc_obj[1]
+            tally = db.votes.tally(event_id)
+            winning_time_votes = tally["times"][0]
+            winning_location_votes = tally["locations"][0]
 
             ret = []
-            ret.append(PATH_FILE_CAL_EVENT(f"{winning_loc_name}_{date}", winning_loc_name, f"{winning_loc_name} @ {wrapper.date_desc(date)} ({winning_time_name}) with {name}!", date, winning_time_name, name))
+            ret.append(PATH_FILE_CAL_EVENT(f"{winning_loc_name}_{date}", winning_loc_name, f"{winning_loc_name} @ {wrapper.date_desc(date)} ({winning_time_name}) with {name}!",
+                                           date, winning_time_name, name))
         
             return ret
 
@@ -583,15 +580,16 @@ class send:
             website = os.path.join(voting_domain, f"?uuid={event_id}&vid={vid}")
             email_raw = mail.raw_email.get_invite(event_id, website)
             email_html = mail.html_email.get_invite(event_id, website)
-            ret = ret and (SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=attendee))
+            sent_rec = SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=[attendee])
+            ret = ret and sent_rec
 
         #send for organizer
         website = os.path.join(voting_domain, f"?uuid={event_id}&vid={event_id}")
         email_raw = mail.raw_email.get_invite(event_id, website)
         email_html = mail.html_email.get_invite(event_id, website)
-        ret = ret and (SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=db.events.get.organizer_email(event_id)))
+        sent = SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=[db.events.get.organizer_email(event_id)])
         
-        return ret 
+        return ret and sent
 
     @staticmethod
     def reminder():
