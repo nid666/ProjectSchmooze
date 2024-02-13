@@ -35,14 +35,10 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Hosted Publically with full userflow 
 - [x] Fix any bugs and optimize voting page
 - [x] Double check API progress
-- [ ] Fix bug when hosted (dean)
 - [x] Deadline to cast vote (dean)
-- [ ] Test deadline (dean)
 - [x] Reminder email one day before vote deadline (dean)
-- [ ] Show final result (dean)
 - [x] Convert pkl to SQLite database (dean)
 - [x] Replace pkl calls with SQLite in front-end (dean)
-- [ ] SQLite email formatting bugs (dean)
 - [x] Unique links for each voter (dean)
 - [x] Improved email formatting for closeness to client (dean)
 - [x] Add sender name (sid)
@@ -50,8 +46,12 @@ This will open a new tab in your default browser with the webapp running.
 - [x] change time to be custom string input (sid)
 - [x] add comment section (Sid)
 - [x] verify if email section is blank before allowing sending of emails (sid)
-- [ ] automatically clear email input once an email is entered (sid)
 - [x] add in forgot password and create account screens (sid)
+- [ ] Fix bug when hosted (dean)
+- [ ] Test deadline (dean)
+- [ ] Show final result (dean)
+- [ ] automatically clear email input once an email is entered (sid)
+- [ ] SQLite email formatting bugs (dean)
 - [ ] fix bugs (dean)
 - [ ] create and add logo to main pages
 
