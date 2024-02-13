@@ -36,9 +36,15 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Fix any bugs and optimize voting page
 - [x] Double check API progress
 - [ ] Fix bug when hosted (dean)
-- [ ] Deadline to cast vote (dean)
-- [ ] Reminder email one day before vote deadline (dean)
+- [x] Deadline to cast vote (dean)
+- [ ] Test deadline (dean)
+- [x] Reminder email one day before vote deadline (dean)
 - [ ] Show final result (dean)
+- [x] Convert pkl to SQLite database (dean)
+- [x] Replace pkl calls with SQLite in front-end (dean)
+- [ ] SQLite email formatting bugs (dean)
+- [x] Unique links for each voter (dean)
+- [x] Improved email formatting for closeness to client (dean)
 - [x] Add sender name (sid)
 - [x] add sender company and get location (sid)
 - [x] change time to be custom string input (sid)
