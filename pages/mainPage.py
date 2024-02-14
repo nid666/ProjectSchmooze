@@ -268,6 +268,7 @@ def mainPage():
                 organizer_email=events['sender'],
                 organizer_loc=events['location'],
                 date=events['date'],
+                comment=events['comment'],
                 deadline=events['deadline'],
                 budget=str(events['budget']),
                 timezone=events['timezone'],

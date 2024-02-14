@@ -309,7 +309,7 @@ class events:
         return tables.query("SELECT 1 FROM events WHERE uuid = ?", (event_id,), "one") != ()
 
     @staticmethod
-    def create(event_id: str, company:str, organizer_email: str, organizer_loc: str, date: str, deadline: str, budget: str, timezone:str, times: list, locations: list, votes: dict) -> bool:
+    def create(event_id: str, company:str, organizer_email: str, organizer_loc: str, date: str, comment:str, deadline: str, budget: str, timezone:str, times: list, locations: list, votes: dict) -> bool:
 
         #if events.exists(event_id): return False
 
@@ -318,8 +318,8 @@ class events:
         locations_str = list_to_str(locations)
         votes_str = dict_to_str(votes)
 
-        result = tables.query("INSERT INTO events (uuid, company, organizer, organizer_loc, date, deadline, budget, timezone, times, locations, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                                (event_id, company, organizer_email, location_str, date, deadline, budget, timezone, times_str, locations_str, votes_str))
+        result = tables.query("INSERT INTO events (uuid, company, organizer, organizer_loc, date, comment, deadline, budget, timezone, times, locations, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                                (event_id, company, organizer_email, location_str, date, comment, deadline, budget, timezone, times_str, locations_str, votes_str))
 
         print(result)
         return result[0] > 0

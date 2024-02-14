@@ -98,11 +98,13 @@ class wrapper:
         for e in guests:
             if db.people.exists.email(e):
                 name = db.people.get.name(e)
-                ret += f"{name} - {e}\n"
+                ret += f"{name} - {e}"
                 if HTML: ret = "<p style='font-size: 11px; color: #555;'>" + ret + "</p>"
                 ret += "\n"
                 continue
-            ret += f"{e}\n"
+            ret += f"{e}"
+            ret = "<p style='font-size: 11px; color: #555;'>" + ret + "</p>"
+            ret += "\n"
 
         return ret[:-1]
 
