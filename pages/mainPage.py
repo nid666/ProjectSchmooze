@@ -264,6 +264,7 @@ def mainPage():
             print(events)
             db.events.create(
                 event_id=events['uuid'],
+                company=events['company'],
                 organizer_email=events['sender'],
                 organizer_loc=events['location'],
                 date=events['date'],
@@ -274,11 +275,11 @@ def mainPage():
                 locations=events['locations'],
                 votes=events['votes']
             )
+
+            db.votes.cast(uuid,uuid,"","")
             for x in events['votes'].keys():
                 val = events['votes'][x]
                 db.votes.cast(uuid, val, "", "")
-
-            db.votes.cast(uuid,uuid,"","")
                 
             st.write(events)
             

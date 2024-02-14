@@ -62,8 +62,7 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS people (
     email TEXT UNIQUE PRIMARY KEY NOT NULL,
     username TEXT UNIQUE,
-    name TEXT,
-    company TEXT
+    name TEXT
 );
 ''') # enforce unique usernames, and unique person name in post
 
@@ -83,6 +82,7 @@ CREATE TABLE IF NOT EXISTS voting (
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS events (
     uuid TEXT UNIQUE PRIMARY KEY NOT NULL,
+    company TEXT,
     organizer TEXT NOT NULL REFERENCES people(email),
     organizer_loc TEXT NOT NULL,
     date TEXT NOT NULL,
@@ -110,7 +110,7 @@ class tables:
                 return (cursor.rowcount,)
 
             if fetch == "all":
-                return cursor.fetchall()
+                return (cursor.fetchall())
             elif fetch == "one":
                 return (cursor.fetchone(),)
             else:
@@ -125,11 +125,11 @@ class people:
 
         @staticmethod
         def email(email:str) -> bool:
-            return tables.query("SELECT 1 FROM people WHERE email = ?", (email,), "one") is not None
+            return tables.query("SELECT 1 FROM people WHERE email = ?", (email,), "one") != ()
 
         @staticmethod
         def username(username:str) -> bool:
-            return tables.query("SELECT 1 FROM people WHERE username = ?", (username,), "one") is not None
+            return tables.query("SELECT 1 FROM people WHERE username = ?", (username,), "one") != ()
 
     class get:
 
@@ -158,15 +158,6 @@ class people:
                 result = tables.query("SELECT name FROM people WHERE email = ?", (s,), "one")
             elif people.exists.username(s):
                 result = tables.query("SELECT name FROM people WHERE username = ?", (s,), "one")
-            return result[0] if result else None
-
-        @staticmethod
-        def company(s:str) -> str:
-            result = None
-            if people.exists.email(s):
-                result = tables.query("SELECT company FROM people WHERE email = ?", (s,), "one")
-            elif people.exists.username(s):
-                result = tables.query("SELECT company FROM people WHERE username = ?", (s,), "one")
             return result[0] if result else None
         
     class set:
@@ -201,20 +192,10 @@ class people:
                 return result[0] > 0
             return False
 
-        @staticmethod
-        def company(s:str, new:str) -> bool:
-            if people.exists.email(s):
-                result = tables.query("UPDATE people SET company = ? WHERE email = ?", (new, s))
-                return result[0] > 0
-            elif people.exists.username(s):
-                result = tables.query("UPDATE people SET company = ? WHERE username = ?", (new, s))
-                return result[0] > 0
-            return False
-
     @staticmethod
     def sync():
         yalm_dict = YAML()
-        yalm_accounts = yalm_dict.get('credentials', {}).get('usernames', {})
+        yalm_accounts = yalm_dict['credentials']['usernames']
         for username in yalm_accounts.keys():
             email = yalm_accounts[username]["email"]
             name = yalm_accounts[username]["name"]
@@ -222,9 +203,9 @@ class people:
                 people.create(email, username, name)
 
     @staticmethod
-    def create(email:str = "", username:str = "", name:str = "", company:str = "")->bool:
+    def create(email:str = "", username:str = "", name:str = "")->bool:
         if email == "": return False
-        result = tables.query("INSERT INTO people (email, username, name, company) VALUES (?, ?, ?, ?)", (email, username, name, company))
+        result = tables.query("INSERT INTO people (email, username, name) VALUES (?, ?, ?)", (email, username, name))
         return result[0] > 0
 
 class votes:
@@ -293,7 +274,7 @@ class events:
         return tables.query("SELECT 1 FROM events WHERE uuid = ?", (event_id,), "one") != ()
 
     @staticmethod
-    def create(event_id: str, organizer_email: str, organizer_loc: str, date: str, deadline: str, budget: str, timezone:str, times: list, locations: list, votes: dict) -> bool:
+    def create(event_id: str, company:str, organizer_email: str, organizer_loc: str, date: str, deadline: str, budget: str, timezone:str, times: list, locations: list, votes: dict) -> bool:
 
         #if events.exists(event_id): return False
 
@@ -302,8 +283,8 @@ class events:
         locations_str = list_to_str(locations)
         votes_str = dict_to_str(votes)
 
-        result = tables.query("INSERT INTO events (uuid, organizer, organizer_loc, date, deadline, budget, timezone, times, locations, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                                (event_id, organizer_email, location_str, date, deadline, budget, timezone, times_str, locations_str, votes_str))
+        result = tables.query("INSERT INTO events (uuid, company, organizer, organizer_loc, date, deadline, budget, timezone, times, locations, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                                (event_id, company, organizer_email, location_str, date, deadline, budget, timezone, times_str, locations_str, votes_str))
         
         return result[0] > 0
 
@@ -364,6 +345,11 @@ class events:
     class get:
 
         @staticmethod
+        def company(event_id: str) -> str:
+            result = tables.query("SELECT company FROM events WHERE uuid = ?", (event_id,), "one")
+            return result[0][0] if result else None
+
+        @staticmethod
         def organizer_email(event_id: str) -> str:
             result = tables.query("SELECT organizer FROM events WHERE uuid = ?", (event_id,), "one")
             return result[0][0] if result else None
@@ -371,7 +357,7 @@ class events:
         @staticmethod
         def organizer_loc(event_id: str) -> str:
             result = tables.query("SELECT organizer_loc FROM events WHERE uuid = ?", (event_id,), "one")
-            return result[0][0] if result else None
+            return str_to_dict(result[0][0]) if result else None
 
         @staticmethod
         def date(event_id: str) -> str:

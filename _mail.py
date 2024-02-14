@@ -85,27 +85,21 @@ class wrapper:
 
     @staticmethod
     def attendees_list(event_id:str, HTML=False):
-        organizer_email = db.events.get.organizer_email(event_id)
+
+        email = db.events.get.organizer_email(event_id)
+        company = db.events.get.company(event_id)
+        name = db.people.get.name(email)
+
+        ret = f"{name} from {company} - {email} (organizer)\n"
+
         guests = list(db.events.get.votes(event_id).keys())
-        guests.insert(0, organizer_email)
-        ret = ""
-        for g in guests:
-            insert = ""
-            has_name = False
-            if db.people.exists.email(g):
-                name = db.people.get.name(g)
-                if name != "" and name != None:
-                    insert += name
-                    has_name = True
-                company = db.people.get.company(g)
-                if company != "":
-                    if not has_name: insert += g
-                    insert += f" from {company}"
-            if has_name: insert += f" - {g}"
-            if g == organizer_email: insert += f" (organizer)"
-            ret += f"{insert}"
-            if HTML: ret = f"<p style='font-size: 11px; color: #555;'>{ret}</p>"
-            ret += "\n"
+        for e in guests:
+            if db.people.exists.email(e):
+                name = db.people.get.name(e)
+                ret += f"{name} - {e}\n"
+                continue
+            ret += f"{e}\n"
+
         return ret[:-1]
 
     @staticmethod
@@ -166,7 +160,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
 
             return f"[{TAG_COMPANY_NAME}] {name} from {company} sent an invitation on {wrapper.date_desc(date)}!"
@@ -176,7 +170,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
 
             return f"[{TAG_COMPANY_NAME}] A reminder to vote for ({company}) {name}'s event on {wrapper.date_desc(date)}!"
@@ -188,7 +182,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             winning_time, winning_location = db.votes.winner(event_id)
@@ -245,7 +239,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -268,7 +262,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -296,7 +290,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             winning_time, winning_location = db.votes.winner(event_id)
@@ -376,7 +370,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -413,7 +407,7 @@ class mail:
 
             email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
-            company = db.people.get.company(email)
+            company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             tally = db.votes.tally(event_id)
@@ -570,8 +564,7 @@ class send:
         subject = mail.subject.get_invite(event_id)
         email_attachments = mail.attachments.get_invite(event_id)
 
-        recipients = list(db.events.get.votes(event_id).keys()).copy()
-        recipients.append(db.events.get.organizer_email(event_id))
+        recipients = list(db.events.get.votes(event_id).keys())
 
         #send for atendes
         ret = True
