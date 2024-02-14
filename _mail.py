@@ -90,13 +90,17 @@ class wrapper:
         company = db.events.get.company(event_id)
         name = db.people.get.name(email)
 
-        ret = f"{name} from {company} - {email} (organizer)\n"
-
+        ret = f"{name} from {company} - {email} (organizer)"
+        if HTML: ret = "<p style='font-size: 11px; color: #555;'>" + ret + "</p>"
+        ret += "\n"
+        
         guests = list(db.events.get.votes(event_id).keys())
         for e in guests:
             if db.people.exists.email(e):
                 name = db.people.get.name(e)
                 ret += f"{name} - {e}\n"
+                if HTML: ret = "<p style='font-size: 11px; color: #555;'>" + ret + "</p>"
+                ret += "\n"
                 continue
             ret += f"{e}\n"
 
@@ -384,7 +388,7 @@ class mail:
                 <body style="background-color: #f7f7f7; font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px;">
                     <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <h2 style="color: #ff9800; text-align: center;">You're Invited!</h2>
-                        <p style="font-size: 16px; color: #555; text-align: center;">{name} from {company} is inviting you to an event on <strong>{wrapper.date_desc(date)}</strong>!</p>
+                        <p style="font-size: 16px; color: #555; text-align: center;"><strong>{name}</strong> from <strong>{company}</strong> is inviting you to an event on <strong>{wrapper.date_desc(date)}</strong>!</p>
                         <p style="font-size: 14px; color: #555; text-align: center;">'{comment}'</p>
                         <p style="text-align: center; margin-top: 25px;">
                             <a href="{voting_link}" style="background-color: #ff9800; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Vote Now</a>

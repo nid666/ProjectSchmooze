@@ -99,7 +99,35 @@ CREATE TABLE IF NOT EXISTS events (
 # ------------------------------  ------------------------------ #
 
 class tables:
-    
+
+    @staticmethod
+    def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
+        print("QUERY RESULT:\n\n")
+        try:
+            cursor.execute(query, params)
+            operation = query.strip().lower().split()[0]
+            if operation in ["insert", "update", "delete"]:
+                conn.commit()
+                ret = (cursor.rowcount,)
+                print(ret)
+                return ret
+
+            if fetch == "all":
+                ret = cursor.fetchall()
+                print(ret)
+                return ret
+            elif fetch == "one":
+                ret = (cursor.fetchone(),)
+                print(ret)
+                return ret
+            else:
+                print()
+                return ()
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+            return ()
+
+""" 
     @staticmethod
     def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
         try:
@@ -118,6 +146,7 @@ class tables:
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")
             return ()
+"""
 
 class people:
 
@@ -125,11 +154,13 @@ class people:
 
         @staticmethod
         def email(email:str) -> bool:
-            return tables.query("SELECT 1 FROM people WHERE email = ?", (email,), "one") != ()
+            result = tables.query("SELECT 1 FROM people WHERE email = ?", (email,), "one")
+            return result[0] is not None
 
         @staticmethod
         def username(username:str) -> bool:
-            return tables.query("SELECT 1 FROM people WHERE username = ?", (username,), "one") != ()
+            result = tables.query("SELECT 1 FROM people WHERE username = ?", (username,), "one")
+            return result[0] is not None
 
     class get:
 
@@ -140,7 +171,7 @@ class people:
                 result = tables.query("SELECT username FROM people WHERE email = ?", (s,), "one")
             elif people.exists.username(s):
                 result = tables.query("SELECT username FROM people WHERE username = ?", (s,), "one")
-            return result[0] if result else None
+            return result[0][0] if result else None
 
         @staticmethod
         def email(s:str) -> str:
@@ -149,7 +180,7 @@ class people:
                 result = tables.query("SELECT email FROM people WHERE email = ?", (s,), "one")
             elif people.exists.username(s):
                 result = tables.query("SELECT email FROM people WHERE username = ?", (s,), "one")
-            return result[0] if result else None
+            return result[0][0] if result else None
 
         @staticmethod
         def name(s:str) -> str:
@@ -158,7 +189,7 @@ class people:
                 result = tables.query("SELECT name FROM people WHERE email = ?", (s,), "one")
             elif people.exists.username(s):
                 result = tables.query("SELECT name FROM people WHERE username = ?", (s,), "one")
-            return result[0] if result else None
+            return result[0][0] if result else None
         
     class set:
 
@@ -199,8 +230,12 @@ class people:
         for username in yalm_accounts.keys():
             email = yalm_accounts[username]["email"]
             name = yalm_accounts[username]["name"]
+            print(f"syncing: {username}->{email}->{name}")
             if not people.exists.email(email) or not people.exists.username(username):
+                print("sync complete!")
                 people.create(email, username, name)
+            else:
+                print("sync failed!")
 
     @staticmethod
     def create(email:str = "", username:str = "", name:str = "")->bool:
@@ -285,7 +320,8 @@ class events:
 
         result = tables.query("INSERT INTO events (uuid, company, organizer, organizer_loc, date, deadline, budget, timezone, times, locations, votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                                 (event_id, company, organizer_email, location_str, date, deadline, budget, timezone, times_str, locations_str, votes_str))
-        
+
+        print(result)
         return result[0] > 0
 
     class _is:
