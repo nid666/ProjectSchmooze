@@ -9,6 +9,26 @@ from yaml.loader import SafeLoader
 
 # ------------------------------  ------------------------------ #
 
+# TEMPORARY FUNCTIONS USED FOR PRESENTATION (MEANT TO BE DELETED AND REPLACED ELENTUALLY BY OPTIMAL, EFFICIENT SOLUTIONS
+# EASY IMPLEMENTATIONS TO BE REPLACED LATER
+
+def to_time_str_list(time_tuples):
+    return [f"{start} - {end}" for start, end in time_tuples]
+
+def to_24_format(time_str_list):
+    def convert_to_12_hour(time_str):
+        hour, minute = map(int, time_str.split(':'))
+        part = "AM" if hour < 12 else "PM"
+        hour = hour % 12
+        hour = 12 if hour == 0 else hour
+        return f"{hour:02d}:{minute:02d} {part}"
+    return [f"{convert_to_12_hour(start)} - {convert_to_12_hour(end)}" for start, end in (time.split(' - ') for time in time_str_list)]
+
+def time_tuple_wrapper(tuples:list)->list:
+    return to_24_format(to_time_str_list(tuples))
+
+# ------------------------------  ------------------------------ #
+
 def UUID() -> str:
     return str(uuid.uuid4())
 
@@ -314,7 +334,13 @@ class events:
         #if events.exists(event_id): return False
 
         location_str = dict_to_str(organizer_loc)
-        times_str = list_to_str(times)
+
+        print(f"times pre-format:\n\t{times}")
+        wrapper_times = time_tuple_wrapper(times)
+        print(f"times pre-format:\n\t{wrapper_times}")
+        times_str = list_to_str(wrapper_times)
+        #times_str = list_to_str(times)
+        
         locations_str = list_to_str(locations)
         votes_str = dict_to_str(votes)
 

@@ -246,7 +246,7 @@ def mainPage():
             events = {
                 'uuid': str(uuid),
                 'date': selected_date.strftime('%Y-%m-%d'),  # Convert to string in YYYY-MM-DD format
-                'times': [str(e) for e in st.session_state.times],
+                'times': st.session_state.times,
                 'locations': [str(l) for l in st.session_state['locations']],
                 'budget': int(budget),  # Convert to string if necessary
                 'sender': str(st.session_state["email"]),

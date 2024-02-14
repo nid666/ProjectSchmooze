@@ -90,21 +90,26 @@ class wrapper:
         company = db.events.get.company(event_id)
         name = db.people.get.name(email)
 
+        ret = ""
         ret = f"{name} from {company} - {email} (organizer)"
         if HTML: ret = "<p style='font-size: 11px; color: #555;'>" + ret + "</p>"
         ret += "\n"
         
         guests = list(db.events.get.votes(event_id).keys())
         for e in guests:
+            insert = ""
             if db.people.exists.email(e):
                 name = db.people.get.name(e)
-                ret += f"{name} - {e}"
-                if HTML: ret = "<p style='font-size: 11px; color: #555;'>" + ret + "</p>"
-                ret += "\n"
-                continue
-            ret += f"{e}"
-            ret = "<p style='font-size: 11px; color: #555;'>" + ret + "</p>"
-            ret += "\n"
+                insert += f"{name} - {e}"
+                if HTML:
+                    insert = "<p style='font-size: 11px; color: #555;'>" + insert + "</p>"
+                insert += "\n"
+            else:
+                insert += f"{e}"
+                if HTML:
+                    insert = "<p style='font-size: 11px; color: #555;'>" + insert + "</p>"
+                insert += "\n"
+            ret += insert
 
         return ret[:-1]
 
