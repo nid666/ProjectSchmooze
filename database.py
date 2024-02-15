@@ -70,15 +70,15 @@ def str_to_dict(s: str) -> dict:
 DOMAIN_NAME = "http://localhost:8501/"
 PATH_FILE_DB = "tables.db"
 
+conn = sqlite3.connect(PATH_FILE_DB)
+cursor_start = conn.cursor()
+
 if not os.path.exists(PATH_FILE_DB):
     with open(PATH_FILE_DB, 'w') as f:
         pass
 
-conn = sqlite3.connect(PATH_FILE_DB)
-cursor = conn.cursor()
-
 # Create 'people' table
-cursor.execute('''
+cursor_start.execute('''
 CREATE TABLE IF NOT EXISTS people (
     email TEXT UNIQUE PRIMARY KEY NOT NULL,
     username TEXT UNIQUE,
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS people (
 ''') # enforce unique usernames, and unique person name in post
 
 # Create 'voting' table
-cursor.execute('''
+cursor_start.execute('''
 CREATE TABLE IF NOT EXISTS voting (
     event_id TEXT NOT NULL,
     voting_id TEXT UNIQUE PRIMARY KEY NOT NULL,
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS voting (
 # Create 'events' table
 # Storing 'times' and 'locations' as JSON strings in TEXT columns
 # 'votes' is also stored as a JSON string
-cursor.execute('''
+cursor_start.execute('''
 CREATE TABLE IF NOT EXISTS events (
     uuid TEXT UNIQUE PRIMARY KEY NOT NULL,
     company TEXT,
@@ -122,6 +122,8 @@ class tables:
 
     @staticmethod
     def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
+        conn = sqlite3.connect(PATH_FILE_DB)
+        cursor = conn.cursor()
         try:
             cursor.execute(query, params)
             operation = query.strip().lower().split()[0]
@@ -293,7 +295,13 @@ class votes:
     def cast(event_id:str = "", voting_id:str = "", chosen_location:str = "", chosen_time:str = "")->bool:
         if not events.exists(event_id): return False
         if voting_id == "": return False
-        result = tables.query("INSERT INTO voting (event_id, voting_id, chosen_location, chosen_time) VALUES (?, ?, ?, ?)", (event_id, voting_id, chosen_location, chosen_time))
+
+        existing_vote = tables.query("SELECT 1 FROM voting WHERE voting_id = ?", (voting_id,), "one")
+        result = ""
+        if existing_vote[0] is None:
+            result = tables.query("INSERT INTO voting (event_id, voting_id, chosen_location, chosen_time) VALUES (?, ?, ?, ?)", (event_id, voting_id, chosen_location, chosen_time))
+        else:
+            result = tables.query("UPDATE voting SET chosen_location = ?, chosen_time = ? WHERE voting_id = ?", (chosen_location, chosen_time, voting_id))
 
         max_votes_count = len(events.get.votes(event_id).keys())
         maj_votes_count = (max_votes_count/2)+1
@@ -302,12 +310,39 @@ class votes:
 
         maj_time = (tally['times'][w_time] >= maj_votes_count)
         maj_location = (tally['locations'][w_location] >= maj_votes_count)
-        if maj_time and maj_location:
+        time_count = 0
+        
+        for c in tally['times'].keys():
+            count = tally['times'][c]
+            time_count += int(count)
+        location_count = 0
+        for c in tally['locations'].keys():
+            count = tally['locations'][c]
+            location_count += int(count)
+
+        guest_length = len(events.get.votes(event_id).keys())
+        all_times = (guest_length == time_count)
+        all_locations = (guest_length == location_count)
+
+        print(f"{maj_time} : (tally['times'][w_time] >= maj_votes_count)")
+        print(f"{maj_location} : (tally['locations'][w_location] >= maj_votes_count)")
+        print(f"{all_times} : all_times = (guest_length == time_count)")
+        print(f"{all_locations} : all_locations = (guest_length == location_count)")
+
+        if (maj_time and maj_location) or (all_times and all_locations):
+            print("vote sent")
             events.set.complete(event_id)
             sender.send.request(event_id, f"{DOMAIN_NAME}?uuid={uuid}&apr=get", True)
-    
-        return result[0] > 0
+        else:
+            print("vote not sent")
 
+        if result[0] is not None and result[0] > 0:
+            
+            print(f"CAST SUCCESS::\n\tRESULT[0]: {result[0]}\n\tevent id: {event_id}\n\tvid: {voting_id}\n\tchosen location: {chosen_location}\n\tchosen time: {chosen_time}\n")
+            return result[0] > 0
+        else:
+            print(f"CAST ERROR::\n\tRESULT[0]: {result[0]}\n\tevent id: {event_id}\n\tvid: {voting_id}\n\tchosen location: {chosen_location}\n\tchosen time: {chosen_time}\n")
+            
     @staticmethod
     def tally(event_id: str = "") -> dict:
         if not events.exists(event_id): {}

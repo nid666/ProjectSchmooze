@@ -18,6 +18,8 @@ TAG_COMPANY_NAME = "SCHMOOZE"
 
 PATH_FILE_CREDENTIALS = "pages/creds.json"
 PATH_DIR_MAIL = "pages/mail"
+DOMAIN_NAME = "http://localhost:8501/"
+VOTING_PAGE = os.path.join(DOMAIN_NAME, "votingPage")
 
 def GET_CREDENTIALS():
 
@@ -582,14 +584,14 @@ class send:
         ret = True
         for attendee in recipients:
             vid = db.events.get.votes(event_id)[attendee]
-            website = os.path.join(voting_domain, f"?uuid={event_id}&vid={vid}")
+            website = os.path.join(VOTING_PAGE, f"?uuid={event_id}&vid={vid}")
             email_raw = mail.raw_email.get_invite(event_id, website)
             email_html = mail.html_email.get_invite(event_id, website)
             sent_rec = SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=[attendee])
             ret = ret and sent_rec
 
         #send for organizer
-        website = os.path.join(voting_domain, f"?uuid={event_id}&vid={event_id}")
+        website = os.path.join(VOTING_PAGE, f"?uuid={event_id}&vid={event_id}")
         email_raw = mail.raw_email.get_invite(event_id, website)
         email_html = mail.html_email.get_invite(event_id, website)
         sent = SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=[db.events.get.organizer_email(event_id)])

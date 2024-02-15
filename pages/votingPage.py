@@ -1,4 +1,5 @@
 import datetime
+from datetime import datetime
 import time
 import streamlit as st
 import re
@@ -16,8 +17,8 @@ def renderRevotePage():
     # Check for existing cookies
     cookies = cookie_manager.get("results")
 
-    uuid = st.session_state.get('uuid', None)
-    if db.events.exists(uuid):
+    uuid = st.query_params.get("uuid")
+    if not db.events.exists(uuid):
         st.error("Invalid UUID")
         return
     
@@ -66,7 +67,7 @@ def renderRevotePage():
                 vote_result = {
                     "votedStatus": True,
                     "uuid": uuid,
-                    "voting_id": st.session_state.get('vid', None),
+                    "voting_id": st.query_params.get("vid"),
                     "selected_location": st.session_state['selected_location'],
                     "selected_time": st.session_state['selected_time']
                 }
@@ -79,9 +80,9 @@ def renderRevotePage():
 
 def renderVotingPage():
     
-    uuid = st.session_state.get('uuid', None)
+    uuid = st.query_params.get("uuid")
 
-    if db.events.exists(uuid):
+    if not db.events.exists(uuid):
         st.error("Invalid UUID")
         return
     
@@ -99,7 +100,7 @@ def renderVotingPage():
     if cookies == None:
         vote_result = {
                 "votedStatus": False,
-                "voting_id": voting_id,
+                "voting_id": st.query_params.get("vid"),
                 "uuid": uuid,
                 "selected_location": None,
                 "selected_time": None
@@ -184,9 +185,7 @@ def renderVotingPage():
             # DATABASE: saved to pickle
             db.votes.cast(uuid,vote_result['voting_id'],vote_result['selected_location'],vote_result['selected_time'])
 
-
-
-
+renderVotingPage()
 
 '''
 

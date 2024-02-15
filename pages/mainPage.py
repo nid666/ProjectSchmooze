@@ -288,7 +288,7 @@ def mainPage():
             
             st.toast("Invite sent successfully!")
 
-            notify.send.invite(uuid, f"{DOMAIN_NAME}", True) # temporary placeholder link for the voting page
+            notify.send.invite(uuid, True) # temporary placeholder link for the voting page
 
 
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:
