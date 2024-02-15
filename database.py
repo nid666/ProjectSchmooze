@@ -67,7 +67,7 @@ def str_to_dict(s: str) -> dict:
 
 # ------------------------------  ------------------------------ #
 
-DOMAIN_NAME = "http://schmooze.us.to/"
+DOMAIN_NAME = "http://localhost:8501/"
 PATH_FILE_DB = "tables.db"
 
 if not os.path.exists(PATH_FILE_DB):
@@ -122,6 +122,29 @@ class tables:
 
     @staticmethod
     def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
+        try:
+            cursor.execute(query, params)
+            operation = query.strip().lower().split()[0]
+
+            if operation in ["insert", "update", "delete"]:
+                conn.commit()
+                return (cursor.rowcount,)
+
+            elif operation == "select":
+                if fetch == "all":
+                    return tuple(cursor.fetchall())
+                elif fetch == "one":
+                    return (cursor.fetchone(),)
+            return (None,)
+
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+            return (None,)
+
+"""
+
+    @staticmethod
+    def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
         print("QUERY RESULT:\n\n")
         try:
             cursor.execute(query, params)
@@ -146,6 +169,7 @@ class tables:
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")
             return ()
+"""
 
 """ 
     @staticmethod
@@ -297,7 +321,7 @@ class votes:
         time_counts = {}
         event_times = events.get.times(event_id)
         for t in event_times:
-            time_counts[l] = 0
+            time_counts[t] = 0
 
         for chosen_location, chosen_time in rows:
             if chosen_location in location_counts.keys():
@@ -307,7 +331,7 @@ class votes:
             if chosen_time in time_counts.keys():
                 time_counts[chosen_time] += 1
             else:
-                time_counts[chosen_time] = 0
+                time_counts[chosen_time] = 1
 
         sorted_locations = {k: v for k, v in sorted(location_counts.items(), key=lambda item: item[1], reverse=True)}
         sorted_times = {k: v for k, v in sorted(time_counts.items(), key=lambda item: item[1], reverse=True)}

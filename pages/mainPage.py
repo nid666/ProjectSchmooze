@@ -4,7 +4,7 @@ import streamlit as st
 import re
 import _mail as notify
 import json
-from streamlit_extras.stateful_button import button 
+from streamlit_extras.stateful_button import button
 import extra_streamlit_components as stx
 import database as db
 import streamlit_authenticator as stauth
@@ -12,6 +12,8 @@ import yaml
 from yaml.loader import SafeLoader
 import streamlit_js_eval as js
 import uuid
+
+DOMAIN_NAME = "http://localhost:8501/"
 
 st.set_page_config(initial_sidebar_state="collapsed")
 
@@ -286,7 +288,7 @@ def mainPage():
             
             st.toast("Invite sent successfully!")
 
-            notify.send.invite(uuid, f"http://schmooze.us.to/", True) # temporary placeholder link for the voting page
+            notify.send.invite(uuid, f"{DOMAIN_NAME}", True) # temporary placeholder link for the voting page
 
 
 if 'authentication_status' in st.session_state and st.session_state['authentication_status']:

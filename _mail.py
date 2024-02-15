@@ -384,10 +384,11 @@ class mail:
             company = db.events.get.company(event_id)
             date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
-            tally = db.votes.tally(event_id)
+            time_options = db.events.get.times(event_id)
+            location_options = db.events.get.locations(event_id)
 
-            times = '\n'.join(f"<p style='font-size: 11px; color: #555;'>{t}</p>" for t in tally["times"].keys())
-            locations = '\n'.join(f"<p style='font-size: 11px; color: #555;'>{l}</p>" for l in tally["locations"].keys())
+            times = '\n'.join(f"<p style='font-size: 11px; color: #555;'>{t}</p>" for t in time_options)
+            locations = '\n'.join(f"<p style='font-size: 11px; color: #555;'>{l}</p>" for l in location_options)
 
             html_content = f"""
             <html>

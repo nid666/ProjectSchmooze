@@ -94,14 +94,16 @@ def main():
                 with st.spinner("Loading Page..."):
                     time.sleep(1)
                     st.switch_page("pages/aprPage.py")
-        elif events._is.attendee(st.query_params.get("uuid") != None and st.query_params.get("vid")) != None:
+        elif db.events._is.attendee(st.query_params.get("uuid"), st.query_params.get("vid")) != None and st.query_params.get("vid") != None:
             event_id = st.query_params.get("uuid")
             current_email = config["credentials"]["usernames"][st.session_state["username"]]["email"]            
-            is_owner = (current_email == db.events.get.organizer_email(event_id))
-            is_invited = db.events._is.attendee(uuid, st.query_params.get("vid"))
-            if (is_owner or is_invited) and not db.events._is.completed(event_id):
+            is_owner = (current_email == db.events.get.organizer_email(event_id)) and (st.query_params.get("uuid") == st.query_params.get("vid"))
+            is_invited = db.events._is.attendee(event_id, st.query_params.get("vid"))
+            if (is_owner or is_invited) and not db.events._is.complete(event_id):
                 # checks if user is part of event recipients or is owner
                 # only lets authorized users pass when the event is NOT complete (still accepting votes)
+                st.session_state['uuid'] = st.query_params.get("uuid")
+                st.session_state['vid'] = st.query_params.get("vid")
                 st.switch_page("pages/votingPage.py")
         else:
             st.switch_page("pages/createAccount.py")

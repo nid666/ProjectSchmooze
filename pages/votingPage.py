@@ -16,7 +16,7 @@ def renderRevotePage():
     # Check for existing cookies
     cookies = cookie_manager.get("results")
 
-    uuid = st.query_params.get("uuid")
+    uuid = st.session_state.get('uuid', None)
     if db.events.exists(uuid):
         st.error("Invalid UUID")
         return
@@ -66,7 +66,7 @@ def renderRevotePage():
                 vote_result = {
                     "votedStatus": True,
                     "uuid": uuid,
-                    "voting_id": st.query_params.get("vid"),
+                    "voting_id": st.session_state.get('vid', None),
                     "selected_location": st.session_state['selected_location'],
                     "selected_time": st.session_state['selected_time']
                 }
@@ -79,7 +79,7 @@ def renderRevotePage():
 
 def renderVotingPage():
     
-    uuid = st.query_params.get("uuid")
+    uuid = st.session_state.get('uuid', None)
 
     if db.events.exists(uuid):
         st.error("Invalid UUID")
@@ -166,7 +166,7 @@ def renderVotingPage():
             # Capture the votes and uuid in a dictionary
             vote_result = {
                 "votedStatus": True,
-                "voting_id": st.query_params.get("vid"),
+                "voting_id": st.session_state.get('vid', None),
                 "uuid": uuid,
                 "selected_location": st.session_state['selected_location'],
                 "selected_time": st.session_state['selected_time']

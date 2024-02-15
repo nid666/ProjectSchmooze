@@ -2,7 +2,7 @@ import _mail as sender
 import database as db
 import datetime
 
-DOMAIN_NAME = "http://schmooze.us.to/"
+DOMAIN_NAME = "http://localhost:8501/"
 
 def reminder():
 
