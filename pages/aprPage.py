@@ -20,7 +20,7 @@ st.markdown(
 # Define a function to be called when the "APPROVE" button is clicked
 def on_approve_click():
     # Placeholder for the function logic; replace with your actual code
-    notify.send.approve(st.session_state['uuid'], True)
+    notify.send.approve(st.query_params.get('uuid'), True)
     
 
 # Main function to render the Streamlit page
@@ -36,7 +36,7 @@ def main():
         if st.button("APPROVE"):
             on_approve_click()
 
-if __name__ == "__main__" and 'authentication_status' in st.session_state and st.session_state['authentication_status']:
+if __name__ == "__main__":    
     main()
 else:
     st.error("Error: invalid login")

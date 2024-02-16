@@ -6,7 +6,7 @@ credentials:
   usernames:
     dbaq:
       email: dnnbaq@gmail.com
-      logged_in: false
+      logged_in: true
       name: Tommy dbaq
       password: $2b$12$DAb48.1IChJyUjoQS2ZtG.6QQZ6zGlIIZFba9z6t.nW/28RNKfxnS
     jsmith:

@@ -282,7 +282,7 @@ def mainPage():
             db.votes.cast(uuid,uuid,"","")
             for x in events['votes'].keys():
                 val = events['votes'][x]
-                db.votes.cast(uuid, val, "", "")
+                db.votes.create(uuid, val)
                 
             st.write(events)
             

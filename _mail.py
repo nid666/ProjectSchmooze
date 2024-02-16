@@ -212,20 +212,21 @@ class mail:
         @staticmethod
         def get_request(event_id: str, request_link:str)->str:
 
+            date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             winning_time, winning_location = db.votes.winner(event_id)
             tally = db.votes.tally(event_id)
             len_guests = len(db.events.get.votes(event_id).keys())
 
-            winning_time_votes = tally["times"][0]
-            winning_location_votes = tally["locations"][0]
+            winning_time_votes = tally["times"][winning_time]
+            winning_location_votes = tally["locations"][winning_location]
 
             times = ""
             for t in tally["times"].keys():
                 t_count = tally["times"][t]
                 time = f"{t} - {tally['times'][t]} out of {len_guests} votes"
                 if t == winning_time: time += " (winner)"
-                times += f"{c}\n"
+                times += f"{t}\n"
             times = times[:-1]
 
             locations = ""
@@ -332,20 +333,21 @@ class mail:
         @staticmethod
         def get_request(event_id: str, request_link: str) -> str:
 
+            date = db.events.get.date(event_id)
             comment = db.events.get.comment(event_id)
             winning_time, winning_location = db.votes.winner(event_id)
             tally = db.votes.tally(event_id)
             len_guests = len(db.events.get.votes(event_id).keys())
 
-            winning_time_votes = tally["times"][0]
-            winning_location_votes = tally["locations"][0]
+            winning_time_votes = tally["times"][winning_time]
+            winning_location_votes = tally["locations"][winning_location]
 
             times = ""
             for t in tally["times"].keys():
                 t_count = tally["times"][t]
                 time = f"<p style='font-size: 11px; color: #555;'>{t} - {tally['times'][t]} out of {len_guests} votes</p>"
                 if t == winning_time: time += " (winner)"
-                times += f"{c}\n"
+                times += f"{t}\n"
             times = times[:-1]
 
             locations = ""
@@ -462,12 +464,15 @@ class mail:
         def get_approve(event_id: str)->str:
 
             tally = db.votes.tally(event_id)
-            winning_time_votes = tally["times"][0]
-            winning_location_votes = tally["locations"][0]
+            date = db.events.get.date(event_id)
+            winning_time, winning_location = db.votes.winner(event_id)
+            winning_time_votes = tally["times"][winning_time]
+            winning_location_votes = tally["locations"][winning_location]
+            name = db.people.get.name(email)
 
             ret = []
-            ret.append(PATH_FILE_CAL_EVENT(f"{winning_loc_name}_{date}", winning_loc_name, f"{winning_loc_name} @ {wrapper.date_desc(date)} ({winning_time_name}) with {name}!",
-                                           date, winning_time_name, name))
+            ret.append(PATH_FILE_CAL_EVENT(f"{winning_location}_{date}", winning_location, f"{winning_location} @ {wrapper.date_desc(date)} ({winning_time}) with {name}!",
+                                           date, winning_time, name))
         
             return ret
 

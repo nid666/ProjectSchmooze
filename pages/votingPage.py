@@ -49,6 +49,7 @@ def renderRevotePage():
 
     if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
 
+            """
             # Initialize session state variables for location
             if 'selected_location' not in st.session_state:
                 st.session_state['selected_location'] = None
@@ -59,22 +60,23 @@ def renderRevotePage():
             if cookies['selected_location'] == st.session_state['selected_location'] and cookies['selected_time'] == st.session_state['selected_time']:
                 st.error("You have already voted for this location and time")
                 return
+            
             # Capture the votes and uuid in a dictionary
-            else:
+            else:"""
 
-                voting_id = cookie_manager.get("results")['voting_id']
+            voting_id = cookie_manager.get("results")['voting_id']
 
-                vote_result = {
-                    "votedStatus": True,
-                    "uuid": uuid,
-                    "voting_id": st.query_params.get("vid"),
-                    "selected_location": st.session_state['selected_location'],
-                    "selected_time": st.session_state['selected_time']
-                }
+            vote_result = {
+                "votedStatus": True,
+                "uuid": uuid,
+                "voting_id": st.query_params.get("vid"),
+                "selected_location": st.session_state['selected_location'],
+                "selected_time": st.session_state['selected_time']
+            }
                 
-                cookie_manager.set("results", vote_result)
+            cookie_manager.set("results", vote_result)
 
-                db.votes.cast(vote_result['uuid'],vote_result['voting_id'],vote_result['selected_location'],vote_result['selected_time'])
+            db.votes.cast(vote_result['uuid'],vote_result['voting_id'],vote_result['selected_location'],vote_result['selected_time'])
 
     st.write('voted')
 

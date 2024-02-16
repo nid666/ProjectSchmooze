@@ -90,7 +90,7 @@ def main():
         if approval_param == "get":
             st.session_state['uuid'] = st.query_params.get("uuid") #
             organizer = db.events.get.organizer_email(st.query_params.get("uuid"))
-            if db.event._is.active(st.query_params.get("uuid")) and (config["credentials"]["usernames"][st.session_state["username"]]["email"] == organizer):
+            if db.events._is.active(st.query_params.get("uuid")) and (config["credentials"]["usernames"][st.session_state["username"]]["email"] == organizer):
                 with st.spinner("Loading Page..."):
                     time.sleep(1)
                     st.switch_page("pages/aprPage.py")
@@ -107,7 +107,7 @@ def main():
                 st.switch_page("pages/votingPage.py")
         else:
             st.switch_page("pages/createAccount.py")
-                
+
 
 
 main()

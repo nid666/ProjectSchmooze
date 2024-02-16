@@ -5,6 +5,7 @@ import yaml
 import datetime
 import sqlite3
 import _mail as sender
+from datetime import datetime
 from yaml.loader import SafeLoader
 
 # ------------------------------  ------------------------------ #
@@ -67,7 +68,7 @@ def str_to_dict(s: str) -> dict:
 
 # ------------------------------  ------------------------------ #
 
-DOMAIN_NAME = "http://localhost:8501/"
+DOMAIN_NAME = "http://localhost:8501"
 PATH_FILE_DB = "tables.db"
 
 conn = sqlite3.connect(PATH_FILE_DB)
@@ -118,6 +119,34 @@ CREATE TABLE IF NOT EXISTS events (
 
 # ------------------------------  ------------------------------ #
 
+"""
+class tables:
+
+    @staticmethod
+    def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
+        try:
+            conn = sqlite3.connect(PATH_FILE_DB)
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            operation = query.strip().lower().split()[0]
+
+            if operation in ["insert", "update", "delete"]:
+                conn.commit()
+                return (cursor.rowcount,)
+
+            elif operation == "select":
+                if fetch == "all":
+                    return tuple(cursor.fetchall())
+                elif fetch == "one":
+                    return (cursor.fetchone(),)
+            return (None,)
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+            return (None,)
+        finally:
+            conn.close()
+
+"""
 class tables:
 
     @staticmethod
@@ -126,7 +155,7 @@ class tables:
         cursor = conn.cursor()
         try:
             cursor.execute(query, params)
-            operation = query.strip().lower().split()[0]
+            operation = query.lower().strip().split()[0]
 
             if operation in ["insert", "update", "delete"]:
                 conn.commit()
@@ -142,6 +171,37 @@ class tables:
         except sqlite3.Error as e:
             print(f"An error occurred: {e}")
             return (None,)
+
+# ------------------------------  ------------------------------ #
+
+def loc_check(event_id: str) -> bool:
+    # Query to count rows with non-empty chosen_location for the given event_id
+    query_non_empty = "SELECT COUNT(*) FROM voting WHERE event_id = ? AND chosen_location IS NOT NULL"
+    # Query to count all rows for the given event_id
+    query_total = "SELECT COUNT(*) FROM voting WHERE event_id = ?"
+    
+    # Execute queries
+    result_non_empty = tables.query(query_non_empty, (event_id,), fetch="one")
+    result_total = tables.query(query_total, (event_id,), fetch="one")
+    
+    # Compare counts and return True if they match, indicating all chosen_locations are non-empty
+    return result_non_empty[0][0] == result_total[0][0]
+
+def tim_check(event_id: str) -> bool:
+    # Query to count rows with non-empty chosen_time for the given event_id
+    query_non_empty = "SELECT COUNT(*) FROM voting WHERE event_id = ? AND chosen_time IS NOT NULL"
+    # Query to count all rows for the given event_id
+    query_total = "SELECT COUNT(*) FROM voting WHERE event_id = ?"
+    
+    # Execute queries
+    result_non_empty = tables.query(query_non_empty, (event_id,), fetch="one")
+    result_total = tables.query(query_total, (event_id,), fetch="one")
+    
+    # Compare counts and return True if they match, indicating all chosen_times are non-empt
+
+
+# ------------------------------  ------------------------------ #
+
 
 """
 
@@ -292,6 +352,13 @@ class people:
 class votes:
 
     @staticmethod
+    def create(event_id:str = "", voting_id:str = ""):
+        if not events.exists(event_id): return False
+        if voting_id == "": return False
+        result = tables.query("INSERT INTO voting (event_id, voting_id, chosen_location, chosen_time) VALUES (?, ?, ?, ?)", (event_id, voting_id, None, None))
+        return result[0] > 0
+
+    @staticmethod
     def cast(event_id:str = "", voting_id:str = "", chosen_location:str = "", chosen_time:str = "")->bool:
         if not events.exists(event_id): return False
         if voting_id == "": return False
@@ -299,19 +366,23 @@ class votes:
         existing_vote = tables.query("SELECT 1 FROM voting WHERE voting_id = ?", (voting_id,), "one")
         result = ""
         if existing_vote[0] is None:
-            result = tables.query("INSERT INTO voting (event_id, voting_id, chosen_location, chosen_time) VALUES (?, ?, ?, ?)", (event_id, voting_id, chosen_location, chosen_time))
-        else:
-            result = tables.query("UPDATE voting SET chosen_location = ?, chosen_time = ? WHERE voting_id = ?", (chosen_location, chosen_time, voting_id))
+            return False
+        result = tables.query("UPDATE voting SET chosen_location = ?, chosen_time = ? WHERE voting_id = ?", (chosen_location, chosen_time, voting_id))
 
         max_votes_count = len(events.get.votes(event_id).keys())
-        maj_votes_count = (max_votes_count/2)+1
+        maj_votes_count = (int(max_votes_count/2))+1
         tally = votes.tally(event_id)
         w_time, w_location = votes.winner(event_id)
 
+
+        """
         maj_time = (tally['times'][w_time] >= maj_votes_count)
         maj_location = (tally['locations'][w_location] >= maj_votes_count)
+        """
+
+
+        """
         time_count = 0
-        
         for c in tally['times'].keys():
             count = tally['times'][c]
             time_count += int(count)
@@ -328,11 +399,16 @@ class votes:
         print(f"{maj_location} : (tally['locations'][w_location] >= maj_votes_count)")
         print(f"{all_times} : all_times = (guest_length == time_count)")
         print(f"{all_locations} : all_locations = (guest_length == location_count)")
+        """
 
-        if (maj_time and maj_location) or (all_times and all_locations):
+        #if (maj_time and maj_location) or (all_times and all_locations):
+        #if (maj_time and maj_location):
+        #if(loc_check(event_id) and tim_check(event_id)):
+        #if tally['locations'][w_location] >= maj_votes_count:
+        if not events._is.complete(event_id):
             print("vote sent")
             events.set.complete(event_id)
-            sender.send.request(event_id, f"{DOMAIN_NAME}?uuid={uuid}&apr=get", True)
+            sender.send.request(event_id, f"{DOMAIN_NAME}/aprPage/?uuid={event_id}&apr=get", True)
         else:
             print("vote not sent")
 
@@ -526,3 +602,4 @@ class analysis:
         return
 
 people.sync()
+

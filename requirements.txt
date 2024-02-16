@@ -8,3 +8,6 @@ streamlit-authenticator
 pyyaml
 streamlit_js_eval
 streamlit-option-menu
+
+
+# SET UP CRON JOB TO RUN "reminder.py"
