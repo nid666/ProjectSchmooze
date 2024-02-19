@@ -4,7 +4,7 @@ import json
 import yaml
 import datetime
 import sqlite3
-import _mail as sender
+#import _mail as sender
 from datetime import datetime
 from yaml.loader import SafeLoader
 
@@ -119,34 +119,6 @@ CREATE TABLE IF NOT EXISTS events (
 
 # ------------------------------  ------------------------------ #
 
-"""
-class tables:
-
-    @staticmethod
-    def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
-        try:
-            conn = sqlite3.connect(PATH_FILE_DB)
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            operation = query.strip().lower().split()[0]
-
-            if operation in ["insert", "update", "delete"]:
-                conn.commit()
-                return (cursor.rowcount,)
-
-            elif operation == "select":
-                if fetch == "all":
-                    return tuple(cursor.fetchall())
-                elif fetch == "one":
-                    return (cursor.fetchone(),)
-            return (None,)
-        except sqlite3.Error as e:
-            print(f"An error occurred: {e}")
-            return (None,)
-        finally:
-            conn.close()
-
-"""
 class tables:
 
     @staticmethod
@@ -172,87 +144,35 @@ class tables:
             print(f"An error occurred: {e}")
             return (None,)
 
+    @staticmethod
+    def print(table_name):
+
+        conn = sqlite3.connect(PATH_FILE_DB)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'")
+            exists = cursor.fetchone()
+            
+            if exists:
+                print(f"Table '{table_name}' exists. Fetching its contents...")
+                cursor.execute(f"SELECT * FROM {table_name}")
+                rows = cursor.fetchall()
+                for row in rows:
+                    print(row)
+            else:
+                print(f"Table '{table_name}' does not exist.")
+        
+        except sqlite3.OperationalError as e:
+            print(f"An error occurred: {e}")
+        
+        finally:
+            conn.close()
+            print("\n\n------ print {table_name} table end ------\n\n")
+
+
 # ------------------------------  ------------------------------ #
 
-def loc_check(event_id: str) -> bool:
-    # Query to count rows with non-empty chosen_location for the given event_id
-    query_non_empty = "SELECT COUNT(*) FROM voting WHERE event_id = ? AND chosen_location IS NOT NULL"
-    # Query to count all rows for the given event_id
-    query_total = "SELECT COUNT(*) FROM voting WHERE event_id = ?"
-    
-    # Execute queries
-    result_non_empty = tables.query(query_non_empty, (event_id,), fetch="one")
-    result_total = tables.query(query_total, (event_id,), fetch="one")
-    
-    # Compare counts and return True if they match, indicating all chosen_locations are non-empty
-    return result_non_empty[0][0] == result_total[0][0]
-
-def tim_check(event_id: str) -> bool:
-    # Query to count rows with non-empty chosen_time for the given event_id
-    query_non_empty = "SELECT COUNT(*) FROM voting WHERE event_id = ? AND chosen_time IS NOT NULL"
-    # Query to count all rows for the given event_id
-    query_total = "SELECT COUNT(*) FROM voting WHERE event_id = ?"
-    
-    # Execute queries
-    result_non_empty = tables.query(query_non_empty, (event_id,), fetch="one")
-    result_total = tables.query(query_total, (event_id,), fetch="one")
-    
-    # Compare counts and return True if they match, indicating all chosen_times are non-empt
-
-
-# ------------------------------  ------------------------------ #
-
-
-"""
-
-    @staticmethod
-    def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
-        print("QUERY RESULT:\n\n")
-        try:
-            cursor.execute(query, params)
-            operation = query.strip().lower().split()[0]
-            if operation in ["insert", "update", "delete"]:
-                conn.commit()
-                ret = (cursor.rowcount,)
-                print(ret)
-                return ret
-
-            if fetch == "all":
-                ret = cursor.fetchall()
-                print(ret)
-                return ret
-            elif fetch == "one":
-                ret = (cursor.fetchone(),)
-                print(ret)
-                return ret
-            else:
-                print()
-                return ()
-        except sqlite3.Error as e:
-            print(f"An error occurred: {e}")
-            return ()
-"""
-
-""" 
-    @staticmethod
-    def query(query: str, params: tuple = (), fetch: str = "all") -> tuple:
-        try:
-            cursor.execute(query, params)
-            operation = query.strip().lower().split()[0]
-            if operation in ["insert", "update", "delete"]:
-                conn.commit()
-                return (cursor.rowcount,)
-
-            if fetch == "all":
-                return (cursor.fetchall())
-            elif fetch == "one":
-                return (cursor.fetchone(),)
-            else:
-                return ()
-        except sqlite3.Error as e:
-            print(f"An error occurred: {e}")
-            return ()
-"""
 
 class people:
 
@@ -352,6 +272,22 @@ class people:
 class votes:
 
     @staticmethod
+    def exists(event_id: str, voting_id:str) -> bool:
+        return tables.query("SELECT 1 FROM voting WHERE event_id = ? AND voting_id = ?", (event_id, voting_id), "one") != (None,)
+
+    class get:
+
+        @staticmethod
+        def location(event_id: str, voting_id: str) -> str:
+            result = tables.query("SELECT chosen_location FROM voting WHERE event_id = ? AND voting_id = ?", (event_id, voting_id), "one")
+            return result[0][0] if result and result[0] else None
+
+        @staticmethod
+        def time(event_id: str, voting_id: str) -> str:
+            result = tables.query("SELECT chosen_time FROM voting WHERE event_id = ? AND voting_id = ?", (event_id, voting_id), "one")
+            return result[0][0] if result and result[0] else None
+
+    @staticmethod
     def create(event_id:str = "", voting_id:str = ""):
         if not events.exists(event_id): return False
         if voting_id == "": return False
@@ -359,61 +295,29 @@ class votes:
         return result[0] > 0
 
     @staticmethod
-    def cast(event_id:str = "", voting_id:str = "", chosen_location:str = "", chosen_time:str = "")->bool:
+    def cast(event_id:str = "", voting_id:str = "", chosen_location:str = None, chosen_time:str = None)->bool:
         if not events.exists(event_id): return False
-        if voting_id == "": return False
+        if not events._is.active(event_id): return False
+        if not votes.exists(event_id, voting_id): return False
 
-        existing_vote = tables.query("SELECT 1 FROM voting WHERE voting_id = ?", (voting_id,), "one")
-        result = ""
-        if existing_vote[0] is None:
-            return False
-        result = tables.query("UPDATE voting SET chosen_location = ?, chosen_time = ? WHERE voting_id = ?", (chosen_location, chosen_time, voting_id))
+        result = tables.query("UPDATE voting SET chosen_location = ?, chosen_time = ? WHERE event_id = ? AND voting_id = ?", (chosen_location, chosen_time, event_id, voting_id))
 
         max_votes_count = len(events.get.votes(event_id).keys())
-        maj_votes_count = (int(max_votes_count/2))+1
+        maj_votes_count = (max_votes_count//2)+1
         tally = votes.tally(event_id)
         w_time, w_location = votes.winner(event_id)
+        w_time_score = tally['times'][w_time]
+        w_location_score = tally['locations'][w_location]
+        all_voted = len(events.get.votes(event_id).keys()) == sum(list(tally['locations'].values()))
 
-
-        """
-        maj_time = (tally['times'][w_time] >= maj_votes_count)
-        maj_location = (tally['locations'][w_location] >= maj_votes_count)
-        """
-
-
-        """
-        time_count = 0
-        for c in tally['times'].keys():
-            count = tally['times'][c]
-            time_count += int(count)
-        location_count = 0
-        for c in tally['locations'].keys():
-            count = tally['locations'][c]
-            location_count += int(count)
-
-        guest_length = len(events.get.votes(event_id).keys())
-        all_times = (guest_length == time_count)
-        all_locations = (guest_length == location_count)
-
-        print(f"{maj_time} : (tally['times'][w_time] >= maj_votes_count)")
-        print(f"{maj_location} : (tally['locations'][w_location] >= maj_votes_count)")
-        print(f"{all_times} : all_times = (guest_length == time_count)")
-        print(f"{all_locations} : all_locations = (guest_length == location_count)")
-        """
-
-        #if (maj_time and maj_location) or (all_times and all_locations):
-        #if (maj_time and maj_location):
-        #if(loc_check(event_id) and tim_check(event_id)):
-        #if tally['locations'][w_location] >= maj_votes_count:
-        if not events._is.complete(event_id):
+        if (w_time_score >= maj_votes_count and w_location_score >= maj_votes_count) or all_voted:
             print("vote sent")
-            events.set.complete(event_id)
-            sender.send.request(event_id, f"{DOMAIN_NAME}/aprPage/?uuid={event_id}&apr=get", True)
+            #events.set.complete(event_id)
+            #sender.send.request(event_id, f"{DOMAIN_NAME}/aprPage/?uuid={event_id}&apr=get", True)
         else:
             print("vote not sent")
 
         if result[0] is not None and result[0] > 0:
-            
             print(f"CAST SUCCESS::\n\tRESULT[0]: {result[0]}\n\tevent id: {event_id}\n\tvid: {voting_id}\n\tchosen location: {chosen_location}\n\tchosen time: {chosen_time}\n")
             return result[0] > 0
         else:
@@ -421,7 +325,7 @@ class votes:
             
     @staticmethod
     def tally(event_id: str = "") -> dict:
-        if not events.exists(event_id): {}
+        if not events.exists(event_id): return {}
         rows = tables.query("SELECT chosen_location, chosen_time FROM voting WHERE event_id = ?", (event_id,))
 
         location_counts = {}
@@ -442,7 +346,7 @@ class votes:
             if chosen_time in time_counts.keys():
                 time_counts[chosen_time] += 1
             else:
-                time_counts[chosen_time] = 1
+                time_counts[chosen_time] = 0
 
         sorted_locations = {k: v for k, v in sorted(location_counts.items(), key=lambda item: item[1], reverse=True)}
         sorted_times = {k: v for k, v in sorted(time_counts.items(), key=lambda item: item[1], reverse=True)}
@@ -461,12 +365,10 @@ class events:
 
     @staticmethod
     def exists(event_id: str) -> bool:
-        return tables.query("SELECT 1 FROM events WHERE uuid = ?", (event_id,), "one") != ()
+        return tables.query("SELECT 1 FROM events WHERE uuid = ?", (event_id,), "one") != (None,)
 
     @staticmethod
     def create(event_id: str, company:str, organizer_email: str, organizer_loc: str, date: str, comment:str, deadline: str, budget: str, timezone:str, times: list, locations: list, votes: dict) -> bool:
-
-        #if events.exists(event_id): return False
 
         location_str = dict_to_str(organizer_loc)
 
@@ -474,7 +376,6 @@ class events:
         wrapper_times = time_tuple_wrapper(times)
         print(f"times pre-format:\n\t{wrapper_times}")
         times_str = list_to_str(wrapper_times)
-        #times_str = list_to_str(times)
         
         locations_str = list_to_str(locations)
         votes_str = dict_to_str(votes)
@@ -509,18 +410,8 @@ class events:
         @staticmethod
         def active(event_id: str) -> bool:
             result = tables.query("SELECT deadline FROM events WHERE uuid = ?", (event_id,), "one")
-            if result and result[0]:
-                deadline_str = result[0][0]
-                try:
-                    # Attempt to parse the deadline string into a datetime object
-                    deadline_date = datetime.strptime(deadline_str, "%Y-%m-%d").date()
-                except ValueError:
-                    # If parsing fails, the string is not in the correct date format
-                    return False
-
-                # Compare the parsed deadline date to the current date
-                current_date = datetime.now().date()
-                return deadline_date >= current_date and deadline_str not in ["COMPLETED", "CANCELLED"]
+            if result and result[0] and result[0][0] != "CANCELLED" and result[0][0] != "COMPLETED":
+                return True
             return False
 
     class set:
@@ -601,5 +492,301 @@ class analysis:
     def averages(date_range="", avg_type="", mode="all", exclude="", *flags):
         return
 
+"""
+events.exists() -- WORKS
+events.create() -- WORKS
+
+'''
+print(f"\nThe table '{EVENT_ID1}' exists: {events.exists(EVENT_ID1)}\n")
+print_table("events")
+print("CREATING NEW EVENT -> " + str(events.create(event_id=E1["event_id"],
+              company=E1["company"],
+              organizer_email=E1["organizer_email"],
+              organizer_loc=E1["organizer_loc"],
+              date=E1["date"],
+              comment=E1["comment"],
+              deadline=E1["deadline"],
+              budget=E1["budget"],
+              timezone=E1["timezone"],
+              times=E1["times"],
+              locations=E1["locations"],
+              votes=E1["votes"]))
+print(f"\nThe table '{EVENT_ID1}' exists: {events.exists(EVENT_ID1)}\n")
+print_table("events")
+'''
+
+
+events._is.attendee() -- WORKS
+
+
+'''
+print_table("events")
+
+FAKE_ID = "FAKE_VID"
+
+print(f"{VOTING1_ID1} is attending {EVENT_ID1}: {events._is.attendee(EVENT_ID1, VOTING1_ID1)}")
+print(f"{VOTING1_ID2} is attending {EVENT_ID1}: {events._is.attendee(EVENT_ID1, VOTING1_ID2)}")
+print(f"{FAKE_ID} is attending {EVENT_ID1}: {events._is.attendee(EVENT_ID1, FAKE_ID)}")
+'''
+
+events._is.active()   -- WORKS
+events._is.complete() -- WORKS
+events._is.cancel()   -- WORKS
+events.set.complete() -- WORKS
+events.set.cancel()   -- WORKS
+
+'''
+
+print(f"\n\nevent is active: {events._is.active(E1['event_id'])}\n\n")
+
+print(f"\n\nevent is complete: {events._is.complete(E1['event_id'])}\n\n")
+print(f"\n\nevent is cancel: {events._is.cancel(E1['event_id'])}\n\n")
+
+print_table("events")
+
+print("setting events...\n")
+print(f"CANCEL: {events.set.cancel(E1['event_id'])}")
+print(f"COMPLETE: {events.set.complete(E1['event_id'])}")
+
+print_table("events")
+
+print(f"\n\nevent is complete: {events._is.complete(E1['event_id'])}\n\n")
+print(f"\n\nevent is cancel: {events._is.cancel(E1['event_id'])}\n\n")
+
+print(f"\n\nevent is active: {events._is.active(E1['event_id'])}\n\n")
+
+print_table("events")
+
+'''
+
+is_attendee = events._is.attendee(eid="placeholder_event_id", vid="placeholder_voting_id")
+is_event_complete = events._is.complete(event_id="placeholder_event_id")
+is_event_cancelled = events._is.cancel(event_id="placeholder_event_id")
+is_event_active = events._is.active(event_id="placeholder_event_id")
+set_event_complete = events.set.complete(event_id="placeholder_event_id")
+set_event_cancel = events.set.cancel(event_id="placeholder_event_id")
+company_name = events.get.company(event_id="placeholder_event_id")
+organizer_email = events.get.organizer_email(event_id="placeholder_event_id")
+organizer_location = events.get.organizer_loc(event_id="placeholder_event_id")
+event_date = events.get.date(event_id="placeholder_event_id")
+event_comment = events.get.comment(event_id="placeholder_event_id")
+event_deadline = events.get.deadline(event_id="placeholder_event_id")
+event_budget = events.get.budget(event_id="placeholder_event_id")
+event_timezone = events.get.timezone(event_id="placeholder_event_id")
+event_times = events.get.times(event_id="placeholder_event_id")
+event_locations = events.get.locations(event_id="placeholder_event_id")
+event_votes = events.get.votes(event_id="placeholder_event_id")
+
+'''
+
+WORKS
+
+print(f"company:  {events.get.company(E1['event_id'])}")
+print(f"organizer_email:  {events.get.organizer_email(E1['event_id'])}")
+print(f"organizer_loc:  {events.get.organizer_loc(E1['event_id'])}")
+print(f"date:  {events.get.date(E1['event_id'])}")
+print(f"comment:  {events.get.comment(E1['event_id'])}")
+print(f"deadline:  {events.get.deadline(E1['event_id'])}")
+print(f"budget:  {events.get.budget(E1['event_id'])}")
+print(f"timezone:  {events.get.timezone(E1['event_id'])}")
+print(f"times:  {events.get.times(E1['event_id'])}")
+print(f"locations:  {events.get.locations(E1['event_id'])}")
+print(f"votes:  {events.get.votes(E1['event_id'])}")
+
+'''
+
+print_table("people")
+
+print("before sync...")
 people.sync()
 
+print_table("people")
+
+people.create("echo@gmail.com", "bm30", "Black")
+
+print_table("people")
+
+print(f"Does username 'bm30' exist?: {people.exists.username('bm30')}")
+print(f"Does username 'bm40' exist?: {people.exists.username('bm40')}")
+print(f"Does email 'echo@gmail.com' exist?: {people.exists.email('echo@gmail.com')}")
+print(f"Does email 'dlb330@rutgers.edu' exist?: {people.exists.email('dlb330@rutgers.edu')}")
+
+print_table("people")
+
+print(f"Username for 'bm30': {people.get.username('bm30')}")
+print(f"updated username: {people.set.username('bm30', 'bm40')}")
+print(f"Updated username for 'bm30': {people.get.username('bm40')}")
+
+print_table("people")
+
+print(f"Email for 'bm40': {people.get.email('bm40')}")
+print(f"updated email: {people.set.email('bm40', 'replaced@gmail.com')}")
+print(f"Updated email for 'bm40': {people.get.email('bm40')}")
+
+print_table("people")
+
+print(f"Name for 'bm40': {people.get.name('bm40')}")
+print(f"updated name: {people.set.name('bm40', 'White')}")
+print(f"Updated name for 'bm40': {people.get.name('bm40')}")
+
+print_table("people")
+
+print(f"Username for 'replaced@gmail.com': {people.get.username('replaced@gmail.com')}")
+print(f"updated username: {people.set.username('replaced@gmail.com', 'bm50')}")
+print(f"Updated username for 'replaced@gmail.com': {people.get.username('replaced@gmail.com')}")
+
+print_table("people")
+
+print(f"Email for 'replaced@gmail.com': {people.get.email('replaced@gmail.com')}")
+print(f"updated email: {people.set.email('replaced@gmail.com', 'echo@gmail.com')}")
+print(f"Updated email for 'echo@gmail.com': {people.get.email('echo@gmail.com')}")
+
+print_table("people")
+
+print(f"Name for 'replaced@gmail.com' replaced with 'echo@gmail.com': {people.get.name('echo@gmail.com')}")
+print(f"updated name: {people.set.name('echo@gmail.com', 'Black')}")
+print(f"Updated name for 'replaced@gmail.com': {people.get.name('echo@gmail.com')}")
+
+print_table("people")
+
+print("after sync...")
+people.sync()
+
+#people.sync()
+
+# VOTES TEST
+
+#result_create_vote = votes.create(event_id="placeholder_event_id", voting_id="placeholder_voting_id")
+#result_cast_vote = votes.cast(event_id="placeholder_event_id", voting_id="placeholder_voting_id", chosen_location="placeholder_location", chosen_time="placeholder_time")
+#tally_result = votes.tally(event_id="placeholder_event_id")
+#winner_time, winner_location = votes.winner(event_id="placeholder_event_id")
+
+
+
+
+print("[[ STARTING TEST! ]]\n\n")
+
+L1 = "L1"
+L2 = "L2"
+L3 = "L3"
+L4 = "L4"
+T1 = "T1"
+T2 = "T2"
+T3 = "T3"
+
+print("CREATING NEW EVENT -> " + str(events.create(event_id=E1["event_id"],
+              company=E1["company"],
+              organizer_email=E1["organizer_email"],
+              organizer_loc=E1["organizer_loc"],
+              date=E1["date"],
+              comment=E1["comment"],
+              deadline=E1["deadline"],
+              budget=E1["budget"],
+              timezone=E1["timezone"],
+              times=E1["times"],
+              locations=E1["locations"],
+              votes=E1["votes"])))
+
+print_table("voting")
+
+print(f"Voting row 1 created: {votes.create(EVENT_ID1, VOTING1_ID1)}")
+print(f"Voting row 2 created: {votes.create(EVENT_ID1, VOTING1_ID2)}")
+
+print(f"Vote 1 location: {votes.get.location(EVENT_ID1, VOTING1_ID1)}")
+print(f"Vote 1 time: {votes.get.time(EVENT_ID1, VOTING1_ID1)}")
+print(f"Vote 2 location: {votes.get.location(EVENT_ID1, VOTING1_ID2)}")
+print(f"Vote 2 time: {votes.get.time(EVENT_ID1, VOTING1_ID2)}")
+
+print_table("voting")
+
+print(f"Vote 1 casted: {votes.cast(EVENT_ID1, VOTING1_ID1, 'Nobu', '11:00 AM - 12:00 PM')}")
+print(f"vote 2 casted: {votes.cast(EVENT_ID1, VOTING1_ID2, 'Supercharged', '11:00 AM - 12:00 PM')}")
+
+print(f"Vote 1 location: {votes.get.location(EVENT_ID1, VOTING1_ID1)}")
+print(f"Vote 1 time: {votes.get.time(EVENT_ID1, VOTING1_ID1)}")
+print(f"Vote 2 location: {votes.get.location(EVENT_ID1, VOTING1_ID2)}")
+print(f"Vote 2 time: {votes.get.time(EVENT_ID1, VOTING1_ID2)}")
+
+print_table("voting")
+
+print(f"Event 1 tally:\n\n{votes.tally(EVENT_ID1)}")
+print(f"Event 1 winners:\n\n {votes.winner(EVENT_ID1)}")
+
+print_table("voting")
+
+os.remove(PATH_FILE_DB)
+
+"""
+
+EVENT_ID1 = "E1"
+VOTING1_ID1 = "V1_1"
+VOTING1_ID2 = "V1_2"
+
+
+E1 = {
+    "event_id":EVENT_ID1,
+    "company":"fg13",
+    "organizer_email":"echo@gmail.com",
+    "organizer_loc":{},
+    "date":"2024/03/01",
+    "comment":"this is a members only event! present you referal card at entry!",
+    "deadline":"2024/02/28",
+    "budget":400,
+    "timezone":"America/New_York",
+    "times":[('10:00','11:00'), ('11:00','12:00')],
+    "locations":["Nobu", "Five Guys", "Supercharged"],
+    "votes":{
+        "replaced@gmail.com":VOTING1_ID1,
+        "dlb330@rutgers.edu":VOTING1_ID2,
+        "dlb660@rutgers.edu":"fsgsgfs",
+        "Bruh6@gmail.com":"h3rrh3rh",
+        "tahoo.yahoo@gmail.com":"cdggcddgc",
+        "tanker.gmail.com":"gbssbbtt"
+        }
+    }
+
+print("CREATING NEW EVENT -> " + str(events.create(event_id=E1["event_id"],
+              company=E1["company"],
+              organizer_email=E1["organizer_email"],
+              organizer_loc=E1["organizer_loc"],
+              date=E1["date"],
+              comment=E1["comment"],
+              deadline=E1["deadline"],
+              budget=E1["budget"],
+              timezone=E1["timezone"],
+              times=E1["times"],
+              locations=E1["locations"],
+              votes=E1["votes"])))
+
+tables.print("voting")
+
+for email in E1['votes'].keys():
+    print(f"Voting row created: {votes.create(EVENT_ID1, E1['votes'][email])}")
+
+count = 1
+for email in E1['votes'].keys():
+    print(f"Voting row {count} casted: {votes.cast(EVENT_ID1, E1['votes'][email], 'Five Guys', 'Supercharged')}")
+    x = input("Proceed (Y/N)?: ")
+    if x.lower() == 'n': break
+    count += 1
+
+
+
+os.remove(PATH_FILE_DB)
+
+
+
+
+"""
+
+# people class function calls
+people_exists_email = people.exists.email(email="placeholder_email")
+people_exists_username = people.exists.username(username="placeholder_username")
+username = people.get.username(s="placeholder_email_or_username")
+email = people.get.email(s="placeholder_email_or_username")
+name = people.get.name(s="placeholder_email_or_username")
+set_username_result = people.set.username(s="placeholder_email_or_username", new="new_placeholder_username")
+set_email_result = people.set.email(s="placeholder_email_or_username", new="new_placeholder_email")
+set_name_result = people.set.name(s="placeholder_email_or_username", new="new_placeholder_name")
+create_person_result = people.create(email="placeholder_email", username="placeholder_username", name="placeholder_name")
+"""
