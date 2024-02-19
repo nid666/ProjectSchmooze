@@ -13,82 +13,15 @@ import yaml
 #might need to include st.cache_data() here if there are performance issues
 cookie_manager = stx.CookieManager(key = "cookieManagerKey")
 
-def renderRevotePage():
-    # Check for existing cookies
-    cookies = cookie_manager.get("results")
-
-    uuid = st.query_params.get("uuid")
-    if not db.events.exists(uuid):
-        st.error("Invalid UUID")
-        return
-    
-    # getting the time and location values
-    locations = db.events.get.locations(uuid)
-    times = db.events.get.times(uuid)
-
-    st.subheader("Change your vote: ")
-    # Location Voting
-    loc_cols = st.columns(len(locations))
-    for c, l in zip(loc_cols, locations):
-            with c:
-                st.header(l)
-                if st.button(label = "Select location " + l, key=f"vote_{l}"):
-                    st.session_state['selected_location'] = l
-                    st.write(f"Location {l} Selected")
-    # Time Selection
-    tim_cols = st.columns(len(times))
-
-    for t, l in zip(tim_cols, times):
-            with t:
-                st.header(l)
-                if st.button(label= "Select", key=f"select_{l}"):
-                    st.session_state['selected_time'] = l
-                    st.write(f"Time {l} Selected")
-                
-    
-
-    if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
-
-            """
-            # Initialize session state variables for location
-            if 'selected_location' not in st.session_state:
-                st.session_state['selected_location'] = None
-            # Initialize session state variables for time
-            if 'selected_time' not in st.session_state:
-                st.session_state['selected_time'] = None
-            
-            if cookies['selected_location'] == st.session_state['selected_location'] and cookies['selected_time'] == st.session_state['selected_time']:
-                st.error("You have already voted for this location and time")
-                return
-            
-            # Capture the votes and uuid in a dictionary
-            else:"""
-
-            voting_id = cookie_manager.get("results")['voting_id']
-
-            vote_result = {
-                "votedStatus": True,
-                "uuid": uuid,
-                "voting_id": st.query_params.get("vid"),
-                "selected_location": st.session_state['selected_location'],
-                "selected_time": st.session_state['selected_time']
-            }
-                
-            cookie_manager.set("results", vote_result)
-
-            db.votes.cast(vote_result['uuid'],vote_result['voting_id'],vote_result['selected_location'],vote_result['selected_time'])
-
-    st.write('voted')
-
 def renderVotingPage():
     
     uuid = st.query_params.get("uuid")
+    vid = st.query_params.get('vid')
 
     if not db.events.exists(uuid):
         st.error("Invalid UUID")
         return
     
-
     st.markdown("<h1 style='text-align: center;'>Voting Page</h1>", unsafe_allow_html=True)
 
     #checking if the cookies exist
@@ -96,96 +29,46 @@ def renderVotingPage():
     with st.spinner("Loading Page..."):
         time.sleep(1)
 
-    voting_id = db.UUID()
-    st.write(voting_id)
-    # If the cookies do not exist, create temp cookies
-    if cookies == None:
-        vote_result = {
-                "votedStatus": False,
-                "voting_id": st.query_params.get("vid"),
-                "uuid": uuid,
-                "selected_location": None,
-                "selected_time": None
-            }
-        cookie_manager.set("results", vote_result)
-    
-    st.write(cookies)
-    # CHANGE THE COOKIES
-    
-    if cookies == None:
-        with st.spinner("Loading Data..."):
-            time.sleep(1)
-    #Checking to see if they voted to render the correct page
-    if cookies['votedStatus'] == True:
-        renderRevotePage()
-        
-    else:
+    st.subheader("Cast Your Vote")
+    # Initialize session state variables for location
+    if 'selected_location' not in st.session_state:
+        st.session_state['selected_location'] = None
+    # Initialize session state variables for time
+    if 'selected_time' not in st.session_state:
+        st.session_state['selected_time'] = None
 
-        st.subheader("Cast Your Vote")
-        # Initialize session state variables for location
-        if 'selected_location' not in st.session_state:
-            st.session_state['selected_location'] = None
-        # Initialize session state variables for time
-        if 'selected_time' not in st.session_state:
-            st.session_state['selected_time'] = None
+    locations = db.events.get.locations(uuid)
+    loc_cols = st.columns(len(locations))
 
+    #Generates the buttons for locations, with c being the columns and l being the location
+    for c, l in zip(loc_cols, locations):
+        with c:
+            st.header(l)
+            if st.button(label = "Select location " + l, key=f"vote_{l}"):
+                st.session_state['selected_location'] = l
+                st.write(f"Location {l} Selected")
 
-        locations = db.events.get.locations(uuid)
-        loc_cols = st.columns(len(locations))
+    st.divider()
 
-        #Generates the buttons for locations, with c being the columns and l being the location
-        for c, l in zip(loc_cols, locations):
-            with c:
-                st.header(l)
-                if st.button(label = "Select location " + l, key=f"vote_{l}"):
-                    st.session_state['selected_location'] = l
-                    st.write(f"Location {l} Selected")
+    st.subheader("Select Reservation Time")
 
-        st.divider()
+    times = db.events.get.times(uuid)
+    tim_cols = st.columns(len(times))
 
-        st.subheader("Select Reservation Time")
+    # Generates the buttons for times, with t being the columns and l being the time
+    for t, l in zip(tim_cols, times):
+        with t:
+            st.header(l)
+            if st.button(label= "Select", key=f"select_{l}"):
+                st.session_state['selected_time'] = l
+                st.write(f"Time {l} Selected")
 
-        times = db.events.get.times(uuid)
-        tim_cols = st.columns(len(times))
+    st.divider()
 
-        # Generates the buttons for times, with t being the columns and l being the time
-        for t, l in zip(tim_cols, times):
-            with t:
-                st.header(l)
-                if st.button(label= "Select", key=f"select_{l}"):
-                    st.session_state['selected_time'] = l
-                    st.write(f"Time {l} Selected")
+    # Renders the final voting button to cast the final vote
+    if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
 
-        st.divider()
-
-        # Renders the final voting button to cast the final vote
-        if st.button(label = "Cast Final Vote", key="cast_final_vote", type="primary", use_container_width=True):
-
-            #results_cookie = cookie_manager.get("results")
-            #results_dict = json.loads(results_cookie)
-            #voting_id = results_dict['voting_id']
-            #voting_id = results_cookie['voting_id']
-
-            # Capture the votes and uuid in a dictionary
-            vote_result = {
-                "votedStatus": True,
-                "voting_id": st.session_state.get('vid', None),
-                "uuid": uuid,
-                "selected_location": st.session_state['selected_location'],
-                "selected_time": st.session_state['selected_time']
-            }
-            #sets the cookie to the new value
-            cookie_manager.set("results", vote_result)
-
-            # Convert the dictionary to a JSON object
-            vote_json = json.dumps(vote_result)
-
-            
-            # You can display the JSON, write it to a file, or send it somewhere
-            st.json(vote_json)
-
-            # DATABASE: saved to pickle
-            db.votes.cast(uuid,vote_result['voting_id'],vote_result['selected_location'],vote_result['selected_time'])
+        db.votes.cast(uuid,vid,st.session_state['selected_location'],st.session_state['selected_time'])
 
 renderVotingPage()
 

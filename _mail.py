@@ -76,7 +76,6 @@ def PATH_FILE_CAL_EVENT(name: str, location: str, desc: str, date: str, time_ran
     event.organizer = organizer
     event.begin = arrow.get(f"{date} {start_time_24hr}", 'YYYY-MM-DD HH:mm', tzinfo=timezone)
     event.end = arrow.get(f"{date} {end_time_24hr}", 'YYYY-MM-DD HH:mm', tzinfo=timezone)
-
     cal.events.add(event)
     with open(path, 'w') as f:
         f.writelines(cal.serialize_iter())
@@ -345,16 +344,20 @@ class mail:
             times = ""
             for t in tally["times"].keys():
                 t_count = tally["times"][t]
-                time = f"<p style='font-size: 11px; color: #555;'>{t} - {tally['times'][t]} out of {len_guests} votes</p>"
+                time = f"<p style='font-size: 11px; color: #555;'>{t} - {tally['times'][t]} out of {len_guests} votes"
                 if t == winning_time: time += " (winner)"
-                times += f"{t}\n"
+                time += "</p>"
+                times += f"{time}\n"
             times = times[:-1]
 
             locations = ""
             for l in tally["locations"].keys():
                 l_count = tally["locations"][l]
-                location = f"<p style='font-size: 11px; color: #555;'>{l} - {l_count} out of {len_guests} votes</p>"
+                location = f"<p style='font-size: 11px; color: #555;'>{l} - {l_count} out of {len_guests} votes"
                 if l == winning_location: location += " (winner)"
+                location += "</p>"
+                locations += f"{location}\n"
+            locations = locations[:-1]
 
             html_content = f"""
             <html>
@@ -462,18 +465,18 @@ class mail:
 
         @staticmethod
         def get_approve(event_id: str)->str:
-
             tally = db.votes.tally(event_id)
             date = db.events.get.date(event_id)
             winning_time, winning_location = db.votes.winner(event_id)
             winning_time_votes = tally["times"][winning_time]
             winning_location_votes = tally["locations"][winning_location]
+            email = db.events.get.organizer_email(event_id)
             name = db.people.get.name(email)
 
             ret = []
             ret.append(PATH_FILE_CAL_EVENT(f"{winning_location}_{date}", winning_location, f"{winning_location} @ {wrapper.date_desc(date)} ({winning_time}) with {name}!",
-                                           date, winning_time, name))
-        
+                                           date, winning_time, name, db.events.get.timezone(event_id)))
+
             return ret
 
         @staticmethod

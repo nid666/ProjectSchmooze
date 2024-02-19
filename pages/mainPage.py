@@ -262,7 +262,6 @@ def mainPage():
                 'deadline': deadline.strftime('%Y-%m-%d') #deadline.strftime('%Y-%m-%d')
             }
 
-
             print(events)
             db.events.create(
                 event_id=events['uuid'],
@@ -279,7 +278,7 @@ def mainPage():
                 votes=events['votes']
             )
 
-            db.votes.cast(uuid,uuid,"","")
+            db.votes.create(uuid,uuid)
             for x in events['votes'].keys():
                 val = events['votes'][x]
                 db.votes.create(uuid, val)

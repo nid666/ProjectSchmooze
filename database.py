@@ -4,7 +4,7 @@ import json
 import yaml
 import datetime
 import sqlite3
-#import _mail as sender
+import _mail as sender
 from datetime import datetime
 from yaml.loader import SafeLoader
 
@@ -308,12 +308,22 @@ class votes:
         w_time, w_location = votes.winner(event_id)
         w_time_score = tally['times'][w_time]
         w_location_score = tally['locations'][w_location]
-        all_voted = len(events.get.votes(event_id).keys()) == sum(list(tally['locations'].values()))
 
-        if (w_time_score >= maj_votes_count and w_location_score >= maj_votes_count) or all_voted:
+        print(f"tally is:\n{tally}\n")
+        print(f"winningtime:{w_time}\nwinninglocation:{w_location}\n")
+
+        print(f"w_time_score is {w_time_score}")
+        print(f"w_location_score is {w_location_score}")
+        print(f"w_time is {w_time}")
+        print(f"w_location is {w_location}")
+
+        print(f"w_time_score >= maj_votes_count -> ({w_time_score >= maj_votes_count})")
+        print(f"w_location_score >= maj_votes_count -> ({w_location_score >= maj_votes_count})")
+
+        if (w_time_score >= maj_votes_count and w_location_score >= maj_votes_count):
             print("vote sent")
-            #events.set.complete(event_id)
-            #sender.send.request(event_id, f"{DOMAIN_NAME}/aprPage/?uuid={event_id}&apr=get", True)
+            events.set.complete(event_id)
+            sender.send.request(event_id, f"{DOMAIN_NAME}/aprPage/?uuid={event_id}&apr=get", True)
         else:
             print("vote not sent")
 
@@ -339,14 +349,10 @@ class votes:
             time_counts[t] = 0
 
         for chosen_location, chosen_time in rows:
-            if chosen_location in location_counts.keys():
+            if chosen_location is not None and chosen_location in location_counts.keys():
                 location_counts[chosen_location] += 1
-            else:
-                location_counts[chosen_location] = 0
-            if chosen_time in time_counts.keys():
+            if chosen_time is not None and chosen_time in time_counts.keys():
                 time_counts[chosen_time] += 1
-            else:
-                time_counts[chosen_time] = 0
 
         sorted_locations = {k: v for k, v in sorted(location_counts.items(), key=lambda item: item[1], reverse=True)}
         sorted_times = {k: v for k, v in sorted(time_counts.items(), key=lambda item: item[1], reverse=True)}
@@ -491,6 +497,8 @@ class analysis:
 
     def averages(date_range="", avg_type="", mode="all", exclude="", *flags):
         return
+
+people.sync()
 
 """
 events.exists() -- WORKS
@@ -718,6 +726,8 @@ os.remove(PATH_FILE_DB)
 
 """
 
+"""
+
 EVENT_ID1 = "E1"
 VOTING1_ID1 = "V1_1"
 VOTING1_ID2 = "V1_2"
@@ -775,7 +785,7 @@ for email in E1['votes'].keys():
 os.remove(PATH_FILE_DB)
 
 
-
+"""
 
 """
 
