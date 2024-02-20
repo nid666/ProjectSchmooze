@@ -18,7 +18,7 @@ TAG_COMPANY_NAME = "SCHMOOZE"
 
 PATH_FILE_CREDENTIALS = "pages/creds.json"
 PATH_DIR_MAIL = "pages/mail"
-DOMAIN_NAME = "http://localhost:8501/"
+DOMAIN_NAME = "https://www.moodfor.xyz"
 VOTING_PAGE = os.path.join(DOMAIN_NAME, "votingPage")
 
 def GET_CREDENTIALS():
@@ -581,7 +581,7 @@ class send:
         return SEND_EMAIL(Bcc=BCC, subject=subject, email_raw=email_raw, email_html=email_html, attachments=email_attachments, recipients=recipients)
 
     @staticmethod
-    def invite(event_id:str, voting_domain:str, BCC=True):
+    def invite(event_id:str, BCC=True):
         
         subject = mail.subject.get_invite(event_id)
         email_attachments = mail.attachments.get_invite(event_id)

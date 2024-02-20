@@ -13,7 +13,7 @@ from yaml.loader import SafeLoader
 import streamlit_js_eval as js
 import uuid
 
-DOMAIN_NAME = "http://localhost:8501/"
+DOMAIN_NAME = "https://www.moodfor.xyz"
 
 st.set_page_config(initial_sidebar_state="collapsed")
 
