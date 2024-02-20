@@ -47,18 +47,17 @@ This will open a new tab in your default browser with the webapp running.
 - [x] add comment section (Sid)
 - [x] verify if email section is blank before allowing sending of emails (sid)
 - [x] add in forgot password and create account screens (sid)
-- [ ] Fix bug when hosted (dean)
-- [ ] Test deadline (dean)
-- [ ] Show final result (dean)
-- [ ] automatically clear email input once an email is entered (sid)
-- [ ] SQLite email formatting bugs (dean)
-- [ ] fix bugs (dean)
-- [ ] create and add logo to main pages
+- [x] Fix bug when hosted (dean)
+- [x] Test deadline (dean)
+- [x] Show final result (dean)
+- [x] SQLite email formatting bugs (dean)
+- [x] fix bugs (dean)
+
 
 ## Phase 4 ToDo (Post API)
 - Distance radius (tentative)
 - Radius to search for entertainment options/restaurants
-- Automatic selection of locations based upon budgets
+- Automatic selection of locations based upon budgets/AI reccomendations
 - [ ] Setup api to allow automatic booking once a vote is finalized
 - [ ] check if a restaunt is avaliable at a given time
 - [ ] Better data capturing for logged in users
@@ -66,3 +65,12 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Add reset password screen
 - [ ] Add AI integration to reccomendations
 - [ ] allow removal of incorrectly entered time slots
+- [ ] create and add logo to main pages
+- [ ] automatically clear email input once an email is entered (sid)
+- [ ] Allow for times such as "1PM" to be entered into the time input
+- [ ] Fix copy and paste issues that occur from refreshing
+
+## Phase 5
+- [ ] Create webscraping for opentable
+- [ ] Integrate automatic time checking with opentable to ensure the place isn't booked
+- [ ] Get user's phone number for open table reservation
