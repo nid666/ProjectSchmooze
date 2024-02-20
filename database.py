@@ -303,7 +303,7 @@ class votes:
         result = tables.query("UPDATE voting SET chosen_location = ?, chosen_time = ? WHERE event_id = ? AND voting_id = ?", (chosen_location, chosen_time, event_id, voting_id))
 
         max_votes_count = len(events.get.votes(event_id).keys())
-        maj_votes_count = (max_votes_count//2)+1
+        maj_votes_count = ((max_votes_count+1)//2)+1
         tally = votes.tally(event_id)
         w_time, w_location = votes.winner(event_id)
         w_time_score = tally['times'][w_time]
