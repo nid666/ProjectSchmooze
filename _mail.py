@@ -67,6 +67,8 @@ def PATH_FILE_CAL_EVENT(name: str, location: str, desc: str, date: str, time_ran
     start_time_24hr = wrapper.convert_time_to_24hr(start_time_str)
     end_time_24hr = wrapper.convert_time_to_24hr(end_time_str)
     path = os.path.join(PATH_DIR_MAIL, f"{name}.ics")
+    print(f"START TIME: {start_time_str}\n")
+    print(f"END TIME: {end_time_str}\n")
 
     cal = Calendar()
     event = Event()
