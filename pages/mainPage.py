@@ -220,7 +220,7 @@ def mainPage():
                 st.toast('Email already added')
             else:
                 # Add the new email to the list of emails
-                st.session_state.emails.append(new_email)
+                st.session_state.emails.append(new_email.lower())
                 # Clear the current email input
                 st.session_state.current_email = ""
                 st.toast("Email Added!")
