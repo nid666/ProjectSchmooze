@@ -34,6 +34,10 @@ def generate_uuid():
 
 def is_valid_12_hour_format(time_str):
     # Adjust regex to allow a single digit for hours less than 10
+    
+    #allows for just hour inputs
+    if re.match(r'^(?:[1-9]|1[12])$', time_str):
+        return True
     if re.match(r'^(0?[1-9]|1[0-2]):([0-5][0-9])$', time_str):
         return True
     else:
@@ -75,8 +79,15 @@ def is_valid_email(email):
         return False
     
 def convert_to_24_hour_format(time_str, am_pm):
-    # Split the time string into hours and minutes
-    hours, minutes = map(int, time_str.split(':'))
+    # Check if the time string includes minutes
+    if ':' in time_str:
+        #split it at the colon
+        hours, minutes = map(int, time_str.split(':'))
+    else:
+        # If no minutes are provided, assume 0 minutes
+        hours = int(time_str)
+        minutes = 0
+
     am_pm = am_pm.upper()
 
     # Convert hours in case of PM
