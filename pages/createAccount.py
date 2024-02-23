@@ -1,4 +1,5 @@
 import datetime
+import database as db
 import time
 import streamlit as st
 import re
@@ -79,6 +80,8 @@ try:
 
     with open('pages/config.yaml', 'w') as file:
             yaml.dump(config, file, default_flow_style=False)
+
+    db.people.sync()
     
 except Exception as e:
     st.error(e)
