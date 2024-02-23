@@ -2,7 +2,7 @@ import _mail as sender
 import database as db
 import datetime
 
-DOMAIN_NAME = "https://www.moodfor.xyz"
+DOMAIN_NAME = "http://www.moodfor.xyz"
 
 def reminder():
 

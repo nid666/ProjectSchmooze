@@ -68,7 +68,7 @@ def str_to_dict(s: str) -> dict:
 
 # ------------------------------  ------------------------------ #
 
-DOMAIN_NAME = "https://www.moodfor.xyz"
+DOMAIN_NAME = "http://www.moodfor.xyz"
 PATH_FILE_DB = "tables.db"
 
 conn = sqlite3.connect(PATH_FILE_DB)

@@ -18,7 +18,7 @@ TAG_COMPANY_NAME = "SCHMOOZE"
 
 PATH_FILE_CREDENTIALS = "pages/creds.json"
 PATH_DIR_MAIL = "pages/mail"
-DOMAIN_NAME = "https://www.moodfor.xyz"
+DOMAIN_NAME = "http://www.moodfor.xyz"
 VOTING_PAGE = os.path.join(DOMAIN_NAME, "votingPage")
 
 def GET_CREDENTIALS():
