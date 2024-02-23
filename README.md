@@ -69,8 +69,10 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] automatically clear email input once an email is entered (sid)
 - [ ] Allow for times such as "1PM" to be entered into the time input
 - [ ] Fix copy and paste issues that occur from refreshing
+- [ ] Allow users to see votes to break ties
 
 ## Phase 5
 - [ ] Create webscraping for opentable
+- [ ] create webscraping based api
 - [ ] Integrate automatic time checking with opentable to ensure the place isn't booked
 - [ ] Get user's phone number for open table reservation
