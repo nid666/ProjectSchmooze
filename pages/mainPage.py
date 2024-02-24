@@ -66,7 +66,7 @@ def get_logged_in_user_email():
 
 #checks if the email given to it is valid or not, returns a boolean
 def is_valid_email(email):
-
+    email = email.lower()
     # Define the regular expression for a valid email
     regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w+$'
     
