@@ -33,10 +33,8 @@ def generate_uuid():
 
 
 def is_valid_12_hour_format(time_str):
-    # Adjust regex to allow a single digit for hours less than 10
-    
-    #allows for just hour inputs
-    if re.match(r'^(?:[1-9]|1[12])$', time_str):
+    # Adjust regex to include number 10 for hours
+    if re.match(r'^(?:[1-9]|1[0-2])$', time_str):
         return True
     if re.match(r'^(0?[1-9]|1[0-2]):([0-5][0-9])$', time_str):
         return True
