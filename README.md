@@ -76,3 +76,13 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] create webscraping based api
 - [ ] Integrate automatic time checking with opentable to ensure the place isn't booked
 - [ ] Get user's phone number for open table reservation
+- [ ] Organizer shouldn't cast vote --> confirmation email for organizer
+- [ ] Combine reservation row and time rows into multiple rows of format '3/1 8pm' --> string detection
+- [ ] Create account, login issue
+- [ ] Delete Tommy's account so he can make one himself
+- [ ] Show time+date input, email inputs.
+- [ ] Beautify 'add locations' section to add row below existing rows and above 'Add Location' button with (-) removal option WITHIN the row
+- [ ] Approval page formatting
+- [ ] API plan
+- [ ] User flow to introduce first time user
+
