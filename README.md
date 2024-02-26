@@ -85,4 +85,5 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] Approval page formatting
 - [ ] API plan
 - [ ] User flow to introduce first time user
+- [ ] Get selected time. Let organizer choose booking time from '30m before - 30m after'
 
