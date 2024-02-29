@@ -52,7 +52,7 @@ This will open a new tab in your default browser with the webapp running.
 - [x] Show final result (dean)
 - [x] SQLite email formatting bugs (dean)
 - [x] fix bugs (dean)
-
+- [x] Allow for times such as "1PM" to be entered into the time input
 
 ## Phase 4 ToDo (Post API)
 - Distance radius (tentative)
@@ -67,10 +67,9 @@ This will open a new tab in your default browser with the webapp running.
 - [ ] allow removal of incorrectly entered time slots
 - [ ] create and add logo to main pages
 - [ ] automatically clear email input once an email is entered (sid)
-- [x] Allow for times such as "1PM" to be entered into the time input
 - [ ] Fix copy and paste issues that occur from refreshing
 - [ ] Allow users to see votes to break ties
-
+- [ ] Rewrite front end with react + tailwind
 ## Phase 5
 - [ ] Create webscraping for opentable
 - [ ] create webscraping based api
